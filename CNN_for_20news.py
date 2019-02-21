@@ -11,7 +11,7 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 from keras.initializers import Constant
 
-BASE_DIR = r"C:\Users\Edvin\Projects"
+BASE_DIR = r"C:\Users\Edvin\Projects\Data"
 GLOVE_DIR = os.path.join(BASE_DIR, 'glove.6B')
 TEXT_DATA_DIR = os.path.join(BASE_DIR, '20_newsgroup')
 
@@ -26,7 +26,7 @@ print('Indexing word vectors.')
 embeddings_index = {}
 counter = 0
 max_words = -2
-f = open(r"C:\Users\Edvin\Projects\glove.6B\glove.6B.100d.txt", encoding="utf8")
+f = open(r"C:\Users\Edvin\Projects\Data\glove.6B\glove.6B.100d.txt", encoding="utf8")
 for line in f:
     values = line.split()
     word = values[0]
