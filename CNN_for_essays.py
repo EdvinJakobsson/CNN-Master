@@ -25,7 +25,7 @@ print('Indexing word vectors.')
 embeddings_index = {}
 counter = 0
 max_words = -2
-f = open(r"C:\Users\Edvin\Projects\CNN-Master\glove.6B.100d.txt", encoding="utf8")
+f = open(r"C:\Users\Edvin\Projects\Data\glove.6B\glove.6B.100d.txt", encoding="utf8")
 for line in f:
     values = line.split()
     word = values[0]
@@ -70,3 +70,19 @@ for name in sorted(os.listdir(TEXT_DATA_DIR)):
                 labels.append(label_id)
 
 print('Found %s texts. ' % len(texts))
+
+
+
+tokenizer = Tokenizer(num_words=MAX_NUM_WORDS)
+tokenizer.fit_on_texts(texts)
+sequences = tokenizer.texts_to_sequences(texts) #list of all texts where words are numbers instead
+word_index = tokenizer.word_index #dictionary mapping each word to the correct number
+
+
+print('Found %s unique tokens.' % len(word_index))
+
+
+data = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros to beginning of text if it is shorter than MAX_SEQUENCE_LENGTH
+labels = to_categorical(np.asarray(labels)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
+print('Shape of data tensor:', data.shape)
+print('Shape of label tensor:', labels.shape)

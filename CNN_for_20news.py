@@ -48,7 +48,7 @@ labels = []  # list of label ids
 
 i = 0
 for name in sorted(os.listdir(TEXT_DATA_DIR)):
-    if i == 2:
+    if i == -2:
         break;
         i += 1
     path = os.path.join(TEXT_DATA_DIR, name)
@@ -109,6 +109,8 @@ print('Preparing embedding matrix.')
 
 # prepare embedding matrix
 num_words = min(MAX_NUM_WORDS, len(word_index)) + 1
+print("number of words: ", num_words)
+
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
 for word, i in word_index.items():
     if i > MAX_NUM_WORDS:
@@ -130,6 +132,15 @@ embedding_layer = Embedding(num_words,
 
 print('Training model.')
 
+count = 0
+zeros = np.zeros(100)
+for i in range(num_words):
+        if embedding_matrix[i][0] == 0 and embedding_matrix[i][1] == 0 and embedding_matrix[i][2] == 0 and embedding_matrix[i][3] == 0:
+            count += 1
+
+print("unused words and total words: ", count,num_words)
+
+
 # train a 1D convnet with global maxpooling
 sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences = embedding_layer(sequence_input)
@@ -147,11 +158,19 @@ model.compile(loss='categorical_crossentropy',
               optimizer='rmsprop',
               metrics=['acc'])
 
-# #model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=2, validation_data=(x_val, y_val))
-#
-# val_loss, val_acc = model.evaluate(x_train, y_train, verbose=2)
-# print("training loss and acc: ", val_loss, val_acc)
-# val_loss, val_acc = model.evaluate(x_val, y_val, verbose=2)
-# print("validation loss and acc: ", val_loss, val_acc)
+model.fit(x_train, y_train, batch_size=128, epochs=10, verbose=2, validation_data=(x_val, y_val))
+
+val_loss, val_acc = model.evaluate(x_train, y_train, verbose=2)
+print("training loss and acc: ", val_loss, val_acc)
+val_loss, val_acc = model.evaluate(x_val, y_val, verbose=2)
+print("validation loss and acc: ", val_loss, val_acc)
 #
 # #model.save("kerasmodel")
+
+count = 0
+zeros = np.zeros(100)
+for i in range(num_words):
+        if embedding_matrix[i][0] == 0 and embedding_matrix[i][1] == 0 and embedding_matrix[i][2] == 0 and embedding_matrix[i][3] == 0:
+            count += 1
+
+print("unused words and total words: ", count,num_words)
