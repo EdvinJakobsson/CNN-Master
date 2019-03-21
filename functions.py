@@ -16,7 +16,8 @@ def read_word_vectors(stop = -1):
 
     embeddings_index = {}
     counter = 0
-    f = open(r"C:\Users\Edvin\Projects\Data\glove.6B\glove.6B.100d.txt", encoding="utf8")
+    f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+              #/home/william/m18_edvin/Projects/Data/glove.6B/
     for line in f:
         values = line.split()
         word = values[0]
@@ -111,7 +112,7 @@ def split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT):
 
 def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = True):
 
-    print('Preparing embedding matrix.')
+#    print('Preparing embedding matrix.')
     num_words = min(MAX_NUM_WORDS, len(word_index)) + 1
     embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
     for word, i in word_index.items():
@@ -131,36 +132,88 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
                                 input_length=MAX_SEQUENCE_LENGTH,
                                 trainable=trainable)
 
-    count = 0
-    zeros = np.zeros(100)
-    for i in range(num_words):
-            if embedding_matrix[i][0] == 0 and embedding_matrix[i][1] == 0 and embedding_matrix[i][2] == 0 and embedding_matrix[i][3] == 0:
-                count += 1
-
-    print("Unused words: " ,count, "/",  num_words)
+#    count = 0
+#    zeros = np.zeros(100)
+#    for i in range(num_words):
+#            if embedding_matrix[i][0] == 0 and embedding_matrix[i][1] == 0 and embedding_matrix[i][2] == 0 and embedding_matrix[i][3] == 0:
+#                count += 1
+#
+#    print("Unused words: " ,count, "/",  num_words)
 
     return embedding_layer
 
 
-def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 2, kernel_length = 5):
 
-    print('Creating model.')
+
+
+
+def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1):
+
     # train a 1D convnet with global maxpooling
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
     x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
-#    x = MaxPooling1D(5)(x)
-#    x = Conv1D(kernels, kernel_length, activation='relu')(x)
-#    x = MaxPooling1D(5)(x)
-#    x = Conv1D(kernels, kernel_length, activation='relu')(x)
+    x = MaxPooling1D(5)(x)
+    x = Conv1D(kernels, kernel_length, activation='relu')(x)
+    x = MaxPooling1D(5)(x)
+    x = Conv1D(kernels, kernel_length, activation='relu')(x)
     x = GlobalMaxPooling1D()(x)
-    x = Dense(kernels, activation='relu')(x)
+    x = Dense(128, activation='relu')(x)
     preds = Dense(11, activation='softmax')(x)
 
     model = Model(sequence_input, preds)
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['acc'])
+
+    return model
+
+
+
+
+def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1):
+
+    print('Creating model...')
+    # train a 1D convnet with global maxpooling
+    from keras.models import Sequential
+    from keras.layers import Dense, Dropout
+    from keras.layers import Embedding
+    from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
+    
+    seq_length = 783
+    
+    model = Sequential()
+    model.add(Conv1D(1, 1, activation='relu', input_shape=(seq_length,100)))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(1, 1, activation='relu'))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(1, 1, activation='relu'))
+    model.add(GlobalMaxPooling1D())
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dense(11, activation='softmax'))
+    
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['accuracy'])
+    
     model.summary()
 
     return model
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
