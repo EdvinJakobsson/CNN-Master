@@ -39,7 +39,7 @@ for kernel_length in range(1,6):
     print("kernel length: ", kernel_length)
     file = "kernel_length_" + str(kernel_length) + ".txt"
     f = open(file, "w+")
-    f.write("essays: 1246 \t \t epochs: 200 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 128 \r\r")
+    f.write("essays: 1246 \t \t epochs: 200 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 128 \r\r layers: 1 \r\r dense: 1")
     f.write("Kernel length  \t \t kernels \t \t min train loss \t \t top train acc \t \t min val loss \t \t top val acc \t \t top train kappa \t \t top val kappa \t \t epoch at top val kappa \r")
 
     # split the data into a training set and a validation set
