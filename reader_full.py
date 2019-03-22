@@ -12,7 +12,8 @@ def read_dataset(*args): #takes either two integers for first and last essay, or
         counter = 0
         if start < 1:
             start = 1
-        with open("/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv", newline='', encoding='latin1') as f:
+        #with open("/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv", newline='', encoding='latin1') as f:
+        with open("C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv", newline='', encoding='latin1') as f:
             reader = csv.reader(f, delimiter='\t')
             for row in reader:
                 counter += 1

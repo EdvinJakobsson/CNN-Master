@@ -152,13 +152,14 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
     # train a 1D convnet with global maxpooling
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
-    x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
+    x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences) #lägg till L2
     x = MaxPooling1D(5)(x)
     x = Conv1D(kernels, kernel_length, activation='relu')(x)
     x = MaxPooling1D(5)(x)
     x = Conv1D(kernels, kernel_length, activation='relu')(x)
     x = GlobalMaxPooling1D()(x)
-    x = Dense(128, activation='relu')(x)
+    x = Dense(128, activation='relu')(x) #minska
+    #dropout
     preds = Dense(11, activation='softmax')(x)
 
     model = Model(sequence_input, preds)
@@ -167,6 +168,14 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
                   metrics=['acc'])
 
     return model
+
+#testa 1 lager
+#testa lite Dense
+#fixed embedding
+#rättade ord
+#slumpmässiga ord
+#confusion matrix!
+
 
 
 
@@ -179,9 +188,9 @@ def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels =
     from keras.layers import Dense, Dropout
     from keras.layers import Embedding
     from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
-    
+
     seq_length = 783
-    
+
     model = Sequential()
     model.add(Conv1D(1, 1, activation='relu', input_shape=(seq_length,100)))
     model.add(MaxPooling1D(5))
@@ -191,29 +200,11 @@ def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels =
     model.add(GlobalMaxPooling1D())
     model.add(Dense(128, activation='sigmoid'))
     model.add(Dense(11, activation='softmax'))
-    
+
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy'])
-    
+
     model.summary()
 
     return model
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
