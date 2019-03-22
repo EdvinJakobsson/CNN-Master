@@ -35,7 +35,7 @@ pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros
 print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
 
-dense_numbers = [2,3,5,7,10,20,50]
+dense_numbers = [3,5,7,10,20,50]
 for dense in dense_numbers:
     print("Dense: ", dense)
     for kernel_length in range(1,6):
@@ -43,7 +43,7 @@ for dense in dense_numbers:
         file = "1layers" + str(dense) + "dense" + str(kernel_length) + "kernels.txt"
         f = open(file, "w+")
         f.write("essays: 1246 \t \t epochs: 200 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 128 \t\t layers: 1 \r \r")
-        f.write("Kernel length  \t \t kernels \t \t min train loss \t \t top train acc \t \t min val loss \t \t top val acc \t \t top train kappa \t \t top val kappa \t \t epoch at top val kappa \r")
+        f.write("Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
 
         # split the data into a training set and a validation set
@@ -89,7 +89,7 @@ for dense in dense_numbers:
                     epoch = 10*(values+1)
 
 
-            f.write("%.0f \t \t \t \t \t \t %.0f \t \t \t \t \t %.2f \t \t \t \t  %.2f \t \t \t \t %.2f \t \t \t \t  %.2f \t \t \t \t  %.3f \t \t \t \t \t  %.3f \t \t \t \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
+            f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
 
 
         f.close()
