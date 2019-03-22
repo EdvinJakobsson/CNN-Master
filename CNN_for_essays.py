@@ -36,7 +36,7 @@ print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
 
 dense_numbers = [2,3,5,7,10,20,50]
-for dense in dense_number:
+for dense in dense_numbers:
     print("Dense: ", dense)
     for kernel_length in range(1,6):
         print("kernel length: ", kernel_length)
