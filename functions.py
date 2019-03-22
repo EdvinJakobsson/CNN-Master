@@ -147,21 +147,11 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
 
 
 
-def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense = 1):
+def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1):
 
     # train a 1D convnet with global maxpooling
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
-<<<<<<< HEAD
-    x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences) #lägg till L2
-    x = MaxPooling1D(5)(x)
-    x = Conv1D(kernels, kernel_length, activation='relu')(x)
-    x = MaxPooling1D(5)(x)
-    x = Conv1D(kernels, kernel_length, activation='relu')(x)
-    x = GlobalMaxPooling1D()(x)
-    x = Dense(128, activation='relu')(x) #minska
-    #dropout
-=======
     x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
     #x = MaxPooling1D(5)(x)
     #x = Conv1D(kernels, kernel_length, activation='relu')(x)
@@ -169,7 +159,6 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
     #x = Conv1D(kernels, kernel_length, activation='relu')(x)
     x = GlobalMaxPooling1D()(x)
     x = Dense(dense, activation='sigmoid')(x)
->>>>>>> 3c88a44575518dc309732fb9232df27ecdd30886
     preds = Dense(11, activation='softmax')(x)
 
     model = Model(sequence_input, preds)
