@@ -174,7 +174,7 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
 #rättade ord
 #slumpmässiga ord
 #confusion matrix!
-
+#dropout och l2
 
 
 

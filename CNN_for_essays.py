@@ -52,7 +52,7 @@ for dense in dense_numbers:
             print("kernels: ", kernels)
             x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT)
 
-            embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = True)
+            embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = False)
 
 
             model = functions.create_model( MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = kernels, kernel_length = kernel_length, dense = dense)
