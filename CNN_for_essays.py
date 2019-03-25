@@ -35,7 +35,7 @@ pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros
 print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
 
-dense_numbers = [3,5,7,10,20,50]
+dense_numbers = [1,2,3,5,7,10,20,50]
 for dense in dense_numbers:
     print("Dense: ", dense)
     for kernel_length in range(1,6):
