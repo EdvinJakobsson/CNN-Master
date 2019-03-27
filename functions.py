@@ -21,8 +21,8 @@ def read_word_vectors(stop = -1):
 
     embeddings_index = {}
     counter = 0
-    f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
-    #f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+    #f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+    f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
     for line in f:
         values = line.split()
         word = values[0]

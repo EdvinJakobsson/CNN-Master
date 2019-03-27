@@ -20,7 +20,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 
-embeddings_index = functions.read_word_vectors()
+embeddings_index = functions.read_word_vectors(1)
 
 data = reader_full.read_dataset(0,1246)
 
@@ -67,7 +67,7 @@ for dense in dense_numbers:
             max_val_kappa = -1
             epoch = 0
 
-            for epochs_between_kappa in range(20):
+            for epochs_between_kappa in range(2):
 
                 model.fit(x_train, d_train, batch_size=128, epochs=10, verbose=False, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
