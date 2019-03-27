@@ -176,7 +176,7 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
 #testa 1 lager
 #testa lite Dense
 #fixed embedding
-#rättade ord
+#rattade ord
 #slumpmässiga ord
 #confusion matrix!
 #dropout och l2
