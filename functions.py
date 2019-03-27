@@ -8,7 +8,12 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 from keras.initializers import Constant
 from BenHamner.score import quadratic_weighted_kappa
+import matplotlib.pyplot as plt
 
+from sklearn import svm, datasets
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn.utils.multiclass import unique_labels
 
 def read_word_vectors(stop = -1):
 
@@ -17,7 +22,7 @@ def read_word_vectors(stop = -1):
     embeddings_index = {}
     counter = 0
     f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
-              #/home/william/m18_edvin/Projects/Data/glove.6B/
+    #f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
     for line in f:
         values = line.split()
         word = values[0]
@@ -153,8 +158,8 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
     x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
-    #x = MaxPooling1D(5)(x)
-    #x = Conv1D(kernels, kernel_length, activation='relu')(x)
+    x = MaxPooling1D(5)(x)
+    x = Conv1D(kernels, 3, activation='relu')(x)
     #x = MaxPooling1D(5)(x)
     #x = Conv1D(kernels, kernel_length, activation='relu')(x)
     x = GlobalMaxPooling1D()(x)
@@ -207,3 +212,91 @@ def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels =
     model.summary()
 
     return model
+
+
+
+
+
+
+
+
+
+def plot_confusion_matrix(y_true, y_pred, classes,
+                          normalize=False,
+                          title=None,
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if not title:
+        if normalize:
+            title = 'Normalized confusion matrix'
+        else:
+            title = 'Confusion matrix, without normalization'
+
+    # Compute confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    # Only use the labels that appear in the data
+    classes = classes[unique_labels(y_true, y_pred)]
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    #print(cm)
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+    ax.figure.colorbar(im, ax=ax)
+    # We want to show all ticks...
+    ax.set(xticks=np.arange(cm.shape[1]),
+           yticks=np.arange(cm.shape[0]),
+           # ... and label them with the respective list entries
+           xticklabels=classes, yticklabels=classes,
+           title=title,
+           ylabel='True label',
+           xlabel='Predicted label')
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+    # Loop over data dimensions and create text annotations.
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, format(cm[i, j], fmt),
+                    ha="center", va="center",
+                    color="white" if cm[i, j] > thresh else "black")
+    fig.tight_layout()
+    return ax
+
+
+
+def argmax(x_val, d_val, model):
+
+    p = model.predict([x_val])
+    y_test = []
+    d_test = []
+    for i in range(len(x_val)):
+        y_test.append(np.argmax(p[i]))
+        d_test.append(np.argmax(d_val[i]))
+
+    return(y_test, d_test)
+
+
+
+def save_confusion_matrix(savefile, model, x, d, lowest_score, highest_score, title=None):
+
+    predictions, targets = argmax(x, d, model)
+
+    class_names = np.array(lowest_score)
+    for i in range(lowest_score+1,highest_score+1):
+        class_names = np.append(class_names, i)
+
+    plot = plot_confusion_matrix(targets, predictions, classes=class_names,
+                      title=title)
+    plt.savefig(savefile)

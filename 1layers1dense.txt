@@ -1,0 +1,1 @@
+essays: 1246 	 	 epochs: 200 	 	  Dropout: no 	 	 k-fold: no 	 	 batch size: 128 		 layers: 2 	 	 dense: 1  Kernel length  	 kernels 	 min train loss 	 top train acc 	 min val loss 	 top val acc 	 top train kappa 	 top val kappa 	 epoch at top val kappa 
