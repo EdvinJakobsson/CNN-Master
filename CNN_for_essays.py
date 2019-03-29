@@ -20,7 +20,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 
-embeddings_index = functions.read_word_vectors(1)
+embeddings_index = functions.read_word_vectors()
 
 data = reader_full.read_dataset(0,1246)
 
@@ -35,28 +35,23 @@ pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros
 print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
 
-dense_numbers = [1,2,5,50]
+dense_numbers = [1,2,3,5,7,10,20,50]
 for dense in dense_numbers:
     print("Dense: ", dense)
-    file = "1layers" + str(dense) + "dense.txt"
+    file = "Results/layers2dense" + str(dense) + ".txt"
     f = open(file, "w+")
     f.write("essays: 1246 \t \t epochs: 200 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 128 \t\t layers: 2 \t \t dense: " + str(dense) + " \r \r")
 
-    for kernel_length in range(5,6):
+    for kernel_length in range(1,6):
         print("kernel length: ", kernel_length)
-
         f.write("Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
-
         # split the data into a training set and a validation set
-        kernel_numbers = [100]
+        kernel_numbers = [10,50,100]
         for kernels in kernel_numbers:
             print("kernels: ", kernels)
             x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT)
-
             embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = False)
-
-
             model = functions.create_model( MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense)
 
             min_train_loss = 1000
@@ -67,15 +62,20 @@ for dense in dense_numbers:
             max_val_kappa = -1
             epoch = 0
 
+            path = "Results/Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length)
+            os.makedirs(path)
+
             for epochs_between_kappa in range(2):
 
-                model.fit(x_train, d_train, batch_size=128, epochs=10, verbose=False, validation_data=(x_val, d_val))
+                model.fit(x_train, d_train, batch_size=10, epochs=1, verbose=True, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                 val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
                 train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, model)
                 val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, model)
 
-        #        print("train kappa: ", train_kappa, "val kappa: ", val_kappa)
+                savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str((epochs_between_kappa+1)*10)
+                functions.save_confusion_matrix(savefile, model, x_val, d_val, lowest_score=2, highest_score=12, title=None)
+
                 if min_train_loss > train_loss:
                     min_train_loss = train_loss
                 if max_train_acc < train_acc:
@@ -92,8 +92,6 @@ for dense in dense_numbers:
 
 
             f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
-
-
     f.close()
 
 print("Done")

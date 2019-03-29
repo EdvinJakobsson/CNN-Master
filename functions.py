@@ -21,8 +21,8 @@ def read_word_vectors(stop = -1):
 
     embeddings_index = {}
     counter = 0
-    #f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
-    f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+    f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+    #f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
     for line in f:
         values = line.split()
         word = values[0]
@@ -239,13 +239,13 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     cm = confusion_matrix(y_true, y_pred)
     # Only use the labels that appear in the data
     classes = classes[unique_labels(y_true, y_pred)]
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
-
-    #print(cm)
+    # if normalize:
+    #     cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    #     print("Normalized confusion matrix")
+    # else:
+    #     print('Confusion matrix, without normalization')
+    #
+    # print(cm)
 
     fig, ax = plt.subplots()
     im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
