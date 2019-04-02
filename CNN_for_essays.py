@@ -20,7 +20,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 
-embeddings_index = functions.read_word_vectors(1)
+embeddings_index = functions.read_word_vectors()
 
 data = reader_full.read_dataset(0,1246)
 
@@ -65,9 +65,9 @@ for dense in dense_numbers:
             path = "Results/Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length)
             os.makedirs(path)
 
-            for epochs_between_kappa in range(2):
+            for epochs_between_kappa in range(3):
 
-                model.fit(x_train, d_train, batch_size=10, epochs=1, verbose=True, validation_data=(x_val, d_val))
+                model.fit(x_train, d_train, batch_size=10, epochs=20, verbose=False, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                 val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
                 train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, model)
