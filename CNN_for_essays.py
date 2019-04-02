@@ -20,7 +20,7 @@ EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
 
-embeddings_index = functions.read_word_vectors()
+embeddings_index = functions.read_word_vectors(1)
 
 data = reader_full.read_dataset(0,1246)
 
