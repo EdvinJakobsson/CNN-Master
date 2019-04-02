@@ -40,9 +40,9 @@ for dense in dense_numbers:
     print("Dense: ", dense)
     file = "Results/layers2dense" + str(dense) + ".txt"
     f = open(file, "w+")
-    f.write("essays: 1246 \t \t epochs: 200 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 128 \t\t layers: 2 \t \t dense: " + str(dense) + " \r \r")
-
-    for kernel_length in range(1,6):
+    f.write("essays: 1246 \t \t epochs: 90 \t \t  Dropout: no \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t dense: " + str(dense) + " \r \r")
+    kernel_length_number = [3,5]
+    for kernel_length in kernel_length_number:
         print("kernel length: ", kernel_length)
         f.write("Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
@@ -67,7 +67,7 @@ for dense in dense_numbers:
 
             for epochs_between_kappa in range(3):
 
-                model.fit(x_train, d_train, batch_size=10, epochs=20, verbose=False, validation_data=(x_val, d_val))
+                model.fit(x_train, d_train, batch_size=10, epochs=30, verbose=False, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                 val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
                 train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, model)
