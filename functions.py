@@ -4,7 +4,7 @@ from keras.preprocessing.text import text_to_word_sequence
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.layers import Dense, Input, GlobalMaxPooling1D
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout
 from keras.models import Model
 from keras.initializers import Constant
 from BenHamner.score import quadratic_weighted_kappa
@@ -15,14 +15,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 
-def read_word_vectors(stop = -1):
+def read_word_vectors(filepath, stop = -1):
 
     print('Indexing word vectors.')
 
     embeddings_index = {}
     counter = 0
-    f = open("/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
-    #f = open("C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt", encoding="utf8")
+    f = open(filepath, encoding="utf8")
     for line in f:
         values = line.split()
         word = values[0]
@@ -152,11 +151,12 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
 
 
 
-def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1):
+def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1, dropout=0):
 
     # train a 1D convnet with global maxpooling
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
+    embedded_sequences = Dropout(dropout)(embedded_sequences)
     x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
     x = MaxPooling1D(5)(x)
     x = Conv1D(kernels, 3, activation='relu')(x)

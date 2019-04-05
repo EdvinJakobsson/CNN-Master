@@ -19,10 +19,16 @@ MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 
+#essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+#wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
-embeddings_index = functions.read_word_vectors()
+essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
-data = reader_full.read_dataset(0,1246)
+
+embeddings_index = functions.read_word_vectors(wordvectorfile)
+
+data = reader_full.read_dataset(0,1246, filepath=essayfile)
 
 texts, essayset, essaynumber, targets = functions.process_texts(data)
 
@@ -52,7 +58,7 @@ for dense in dense_numbers:
             print("kernels: ", kernels)
             x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT)
             embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = False)
-            model = functions.create_model( MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense)
+            model = functions.create_model( MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = 0.5)
 
             min_train_loss = 1000
             max_train_acc = 0
