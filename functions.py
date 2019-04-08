@@ -151,14 +151,14 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
 
 
 
-def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1, dropout=0):
+def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1, dropout=0, maxpooling = 5):
 
     # train a 1D convnet with global maxpooling
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
     embedded_sequences = Dropout(dropout)(embedded_sequences)
     x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
-    x = MaxPooling1D(5)(x)
+    x = MaxPooling1D(maxpooling)(x)
     x = Conv1D(kernels, 3, activation='relu')(x)
     #x = MaxPooling1D(5)(x)
     #x = Conv1D(kernels, kernel_length, activation='relu')(x)
