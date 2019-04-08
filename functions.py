@@ -37,41 +37,36 @@ def read_word_vectors(filepath, stop = -1):
     return embeddings_index
 
 
-def quadratic_weighted_kappa_for_cnn(x_val, d_val, model):
-
-    p = model.predict([x_val])
-    y_test = []
-    d_test = []
-    for i in range(len(x_val)):
-        y_test.append(np.argmax(p[i]))
-        d_test.append(np.argmax(d_val[i]))
-
+def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output):
+    y_test, d_test = argmax(x_val, d_val, essayset, model, softmax_output)
     kappa = quadratic_weighted_kappa(d_test, y_test)
+
+
     return kappa
 
-
-def process_texts(data):
-
+def process_texts(data, softmax_output):
     print('Processing text dataset')
-
     texts = []  # list of text samples
-    essayset  = [] #list of which set each text belongs to
+    essaysetlist  = [] #list of which set each text belongs to
     essaynumber = []
     targets = []
 
     for row in data:
         texts.append(row[2])
-        essayset.append(int(row[1]))
+        essaysetlist.append(int(row[1]))
         essaynumber.append(int(row[0]))
         targets.append(int(row[6])-2) #changing grades from 2-13 to 0-11
+    if(softmax_output):
+        targets = to_categorical(np.asarray(targets)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
+    else:
+        targets = [x / 10 for x in targets]
+        targets = np.array(targets)
 
-    targets = to_categorical(np.asarray(targets)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
-    essayset = np.array(essayset)
+    essaysetlist = np.array(essaysetlist)
     essaynumber = np.array(essaynumber)
-
     print('Found %s texts. ' % len(texts))
 
-    return texts, essayset, essaynumber, targets
+    return texts, essaysetlist, essaynumber, targets
 
 
 def texts_to_sequences(MAX_NUM_WORDS, texts):
@@ -173,13 +168,6 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
 
     return model
 
-#testa 1 lager
-#testa lite Dense
-#fixed embedding
-#rattade ord
-#slumpmassiga ord
-#confusion matrix!
-#dropout och l2
 
 
 
@@ -276,28 +264,38 @@ def plot_confusion_matrix(y_true, y_pred, classes,
 
 
 
-def argmax(x_val, d_val, model):
+def argmax(x_val, d_val, essayset, model, softmax_output):
+    if essayset == 1:
+        max_score = 10
+    else:
+        print("argmax: Wrong essayset input!")
 
     p = model.predict([x_val])
-    y_test = []
-    d_test = []
-    for i in range(len(x_val)):
-        y_test.append(np.argmax(p[i]))
-        d_test.append(np.argmax(d_val[i]))
+    predictions = []
+    targets = []
+    if softmax_output:
+        for i in range(len(x_val)):
+            predictions.append(np.argmax(p[i]))
+            targets.append(np.argmax(d_val[i]))
+    else:
+        for i in range(len(x_val)):
+            predictions.append(int(p[i]*max_score+0.5))
+            targets.append(int(d_val[i]*max_score))
 
-    return(y_test, d_test)
+    return(predictions, targets)
 
 
 
-def save_confusion_matrix(savefile, model, x, d, lowest_score, highest_score, title=None):
+def save_confusion_matrix(savefile, x, d, model, essayset, softmax_output, title=None):
+    if essayset==1:
+        lowest_score = 2
+        highest_score = 12
 
-    predictions, targets = argmax(x, d, model)
-
+    predictions, targets = argmax(x, d, essayset, model, softmax_output)
     class_names = np.array(lowest_score)
     for i in range(lowest_score+1,highest_score+1):
         class_names = np.append(class_names, i)
 
-    plot = plot_confusion_matrix(targets, predictions, classes=class_names,
-                      title=title)
+    plot = plot_confusion_matrix(targets, predictions, classes=class_names, title=title)
     plt.savefig(savefile)
     plt.close()
