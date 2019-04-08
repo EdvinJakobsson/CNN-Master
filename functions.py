@@ -300,3 +300,4 @@ def save_confusion_matrix(savefile, model, x, d, lowest_score, highest_score, ti
     plot = plot_confusion_matrix(targets, predictions, classes=class_names,
                       title=title)
     plt.savefig(savefile)
+    plt.close()

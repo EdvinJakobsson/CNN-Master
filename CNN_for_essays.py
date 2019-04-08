@@ -22,7 +22,7 @@ VALIDATION_SPLIT = 0.2
 dense_numbers = [20]
 kernel_numbers = [50]
 kernel_length_number = [5]
-numbers_of_kappa_measurements = 200
+numbers_of_kappa_measurements = 300
 epochs_between_kappa = 1
 
 #essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
@@ -76,14 +76,19 @@ for dense in dense_numbers:
             path = "Results/Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length)
             os.makedirs(path)
 
+            testfile = open("Results/kappas.txt", "w+")
+            testfile.write("epoch \t train loss \t train acc \t val loss \t val acc \t train kappa \t val kappa \r")
 
-            for i in range(numbers_of_kappa_measurements):
+
+            for i in range(1, numbers_of_kappa_measurements+1):
                 print("Epoch: " + str(i*epochs_between_kappa))
                 model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                 val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
                 train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, model)
                 val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, model)
+
+                testfile.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
 
                 savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
                 functions.save_confusion_matrix(savefile, model, x_val, d_val, lowest_score=2, highest_score=12, title=None)
@@ -105,5 +110,5 @@ for dense in dense_numbers:
 
             f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
     f.close()
-
+    testfile.close()
 print("Done")
