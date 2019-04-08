@@ -22,7 +22,7 @@ VALIDATION_SPLIT = 0.2
 dense_numbers = [20]
 kernel_numbers = [50]
 kernel_length_number = [5]
-numbers_of_kappa_measurements = 100
+numbers_of_kappa_measurements = 200
 epochs_between_kappa = 1
 
 #essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
@@ -78,7 +78,7 @@ for dense in dense_numbers:
 
 
             for i in range(numbers_of_kappa_measurements):
-
+                print("Epoch: " + str(i*epochs_between_kappa))
                 model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
                 train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                 val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
