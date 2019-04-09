@@ -31,11 +31,11 @@ epochs_between_kappa = 5
 dropout = 0.5
 
 
-#essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-#wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
-essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+#essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+#wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile)

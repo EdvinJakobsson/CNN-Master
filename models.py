@@ -20,5 +20,5 @@ def CNN_sigmoidal_output(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kerne
 
     model = Model(sequence_input, y)
     model.compile(loss='mse',
-                  optimizer='rmsprop')
+                  optimizer='rmsprop', metrics=['acc'])
     return model
