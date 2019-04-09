@@ -20,12 +20,13 @@ MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 essayset = 1
-softmax_output = False
 
+softmax_output = False
+trainable_embeddings = True
 dense_numbers = [1]
-kernel_numbers = [1,2,3,5,10,20,50,100,150,200]
+kernel_numbers = [3,20,50,100,150,200]
 kernel_length_number = [1,2,3,5,7,10]
-numbers_of_kappa_measurements = 40
+numbers_of_kappa_measurements = 60
 epochs_between_kappa = 5
 dropout = 0.5
 
@@ -67,7 +68,7 @@ for dense in dense_numbers:
         for kernels in kernel_numbers:
             print("kernels: ", kernels)
             x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essaysetlist, essaynumber, targets, VALIDATION_SPLIT)
-            embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = False)
+            embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = trainable_embeddings)
 
             if softmax_output:
                 model = functions.create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
