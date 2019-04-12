@@ -20,27 +20,27 @@ MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 essayset = 1
+essays = 1246
 
 softmax_output = False
-trainable_embeddings = True
+trainable_embeddings = False
 dense_numbers = [1]
-kernel_numbers = [3,20,50,100,150,200]
-kernel_length_number = [1,2,3,5,7,10]
-numbers_of_kappa_measurements = 60
-epochs_between_kappa = 5
-dropout = 0.5
+kernel_numbers = [100]
+kernel_length_number = [3]
+numbers_of_kappa_measurements = 20
+epochs_between_kappa = 10
+dropout_numbers = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
 
+#essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+#wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
-essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-
-#essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-#wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile)
 
-data = reader_full.read_dataset(0,1246, filepath=essayfile)
+data = reader_full.read_dataset(0,essays, filepath=essayfile)
 
 texts, essaysetlist, essaynumber, targets = functions.process_texts(data, softmax_output)
 
@@ -53,73 +53,76 @@ pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros
 print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
 
+for dropout in dropout_numbers:
+    print("Dropout: ", dropout)
+    folder = "Results/dropout" + str(dropout) + "/"
+    os.makedirs(folder)
+    for dense in dense_numbers:
+        print("Dense: ", dense)
+        file = folder + "layers2dense" + str(dense) + ".txt"
+        f = open(file, "w+")
+        f.write("essays: 1246 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t  Dropout: " + str(dropout) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \t \t dense: " + str(dense) + " \r \r")
 
-for dense in dense_numbers:
-    print("Dense: ", dense)
-    file = "Results/layers2dense" + str(dense) + ".txt"
-    f = open(file, "w+")
-    f.write("essays: 1246 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t  Dropout: " + str(dropout) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \t \t dense: " + str(dense) + " \r \r")
+        for kernel_length in kernel_length_number:
+            print("kernel length: ", kernel_length)
+            f.write("Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
-    for kernel_length in kernel_length_number:
-        print("kernel length: ", kernel_length)
-        f.write("Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
+            # split the data into a training set and a validation set
+            for kernels in kernel_numbers:
+                print("kernels: ", kernels)
+                x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essaysetlist, essaynumber, targets, VALIDATION_SPLIT)
+                embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = trainable_embeddings)
 
-        # split the data into a training set and a validation set
-        for kernels in kernel_numbers:
-            print("kernels: ", kernels)
-            x_train, d_train, x_val, d_val = functions.split_data(pad_sequences, essaysetlist, essaynumber, targets, VALIDATION_SPLIT)
-            embedding_layer = functions.embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DIM, embeddings_index, randomize_unseen_words = True, trainable = trainable_embeddings)
-
-            if softmax_output:
-                model = functions.create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-            else:
-                model = models.CNN_sigmoidal_output(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
-
-
-            min_train_loss = 1000
-            max_train_acc = 0
-            min_val_loss = 1000
-            max_val_acc = 0
-            max_train_kappa = -1
-            max_val_kappa = -1
-            epoch = 0
-
-            path = "Results/Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length)
-            os.makedirs(path)
-            training_file = path + "/training_file.txt"
-            training_values = open(training_file, "w+")
-            training_values.write("epoch \t train loss \t train acc \t val loss \t val acc \t train kappa \t val kappa \r")
+                if softmax_output:
+                    model = functions.create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+                else:
+                    model = models.CNN_sigmoidal_output(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
 
 
-            for i in range(1, numbers_of_kappa_measurements+1):
-                print("Epoch: " + str(i*epochs_between_kappa))
-                model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
-                train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
-                val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
-                train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, essayset, model, softmax_output)
-                val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output)
+                min_train_loss = 1000
+                max_train_acc = 0
+                min_val_loss = 1000
+                max_val_acc = 0
+                max_train_kappa = -1
+                max_val_kappa = -1
+                epoch = 0
 
-                training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
-                savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
-                functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)
-
-                if min_train_loss > train_loss:
-                    min_train_loss = train_loss
-                if max_train_acc < train_acc:
-                    max_train_acc = train_acc
-                if min_val_loss > val_loss:
-                    min_val_loss = val_loss
-                if max_val_acc < val_acc:
-                    max_val_acc = val_acc
-                if max_train_kappa < train_kappa:
-                    max_train_kappa = train_kappa
-                if max_val_kappa < val_kappa:
-                    max_val_kappa = val_kappa
-                    epoch = i*epochs_between_kappa
+                path = folder + "Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length)
+                os.makedirs(path)
+                training_file = path + "/training_file.txt"
+                training_values = open(training_file, "w+")
+                training_values.write("epoch \t train loss \t train acc \t val loss \t val acc \t train kappa \t val kappa \r")
 
 
-            f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
-            training_values.close()
-    f.close()
+                for i in range(1, numbers_of_kappa_measurements+1):
+                    print("Epoch: " + str(i*epochs_between_kappa))
+                    model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
+                    train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
+                    val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
+                    train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, essayset, model, softmax_output)
+                    val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output)
+
+                    training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
+                    savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
+                    functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)
+
+                    if min_train_loss > train_loss:
+                        min_train_loss = train_loss
+                    if max_train_acc < train_acc:
+                        max_train_acc = train_acc
+                    if min_val_loss > val_loss:
+                        min_val_loss = val_loss
+                    if max_val_acc < val_acc:
+                        max_val_acc = val_acc
+                    if max_train_kappa < train_kappa:
+                        max_train_kappa = train_kappa
+                    if max_val_kappa < val_kappa:
+                        max_val_kappa = val_kappa
+                        epoch = i*epochs_between_kappa
+
+
+                f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
+                training_values.close()
+        f.close()
 
 print("Done")
