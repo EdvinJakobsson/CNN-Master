@@ -1,7 +1,9 @@
 import os
 
-dense =1
-kernels =2
-kernel_length=3
+import functions
 
-os.makedirs("Results/Images/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length))
+l1 = [1,2,3]
+l2 = [4,2,4]
+l3 = [2,5,9]
+
+functions.plot_kappa(l1,l2,l3)

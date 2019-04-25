@@ -29,8 +29,13 @@ kernel_numbers = [100]
 kernel_length_number = [3]
 numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
-dropout_numbers = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
 
+#essays = 12
+#kernel_numbers = [1]
+#kernel_length_number = [3]
+#numbers_of_kappa_measurements = 5
+#epochs_between_kappa = 1
 #essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 #wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
@@ -39,15 +44,10 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile)
-
 data = reader_full.read_dataset(0,essays, filepath=essayfile)
-
 texts, essaysetlist, essaynumber, targets = functions.process_texts(data, softmax_output)
-
 sequences, word_index = functions.texts_to_sequences(MAX_NUM_WORDS, texts)
-
 MAX_SEQUENCE_LENGTH = min(MAX_SEQUENCE_LENGTH, functions.longest_text(sequences))
-
 pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros to beginning of text if it is shorter than MAX_SEQUENCE_LENGTH
 
 print('Shape of data tensor:', pad_sequences.shape)
@@ -93,7 +93,9 @@ for dropout in dropout_numbers:
                 training_values = open(training_file, "w+")
                 training_values.write("epoch \t train loss \t train acc \t val loss \t val acc \t train kappa \t val kappa \r")
 
-
+                epoch_list = []
+                train_kappa_list = []
+                val_kappa_list = []
                 for i in range(1, numbers_of_kappa_measurements+1):
                     print("Epoch: " + str(i*epochs_between_kappa))
                     model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
@@ -105,6 +107,10 @@ for dropout in dropout_numbers:
                     training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
                     savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
                     functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)
+
+                    epoch_list.append(i*epochs_between_kappa)
+                    train_kappa_list.append(train_kappa)
+                    val_kappa_list.append(val_kappa)
 
                     if min_train_loss > train_loss:
                         min_train_loss = train_loss
@@ -120,9 +126,11 @@ for dropout in dropout_numbers:
                         max_val_kappa = val_kappa
                         epoch = i*epochs_between_kappa
 
-
                 f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
                 training_values.close()
+                print("this:", epoch_list, train_kappa_list, val_kappa_list)
+                plotimage = path + "/plot_kappa.png"
+
         f.close()
 
 print("Done")
