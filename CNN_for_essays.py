@@ -31,13 +31,14 @@ numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
 dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
 
-#essays = 12
-#kernel_numbers = [1]
-#kernel_length_number = [3]
-#numbers_of_kappa_measurements = 5
-#epochs_between_kappa = 1
-#essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-#wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+# essays = 12
+# kernel_numbers = [1]
+# kernel_length_number = [3]
+# numbers_of_kappa_measurements = 5
+# epochs_between_kappa = 1
+# dropout_numbers = [0,0.1]
+# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
@@ -128,9 +129,8 @@ for dropout in dropout_numbers:
 
                 f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
                 training_values.close()
-                print("this:", epoch_list, train_kappa_list, val_kappa_list)
                 plotimage = path + "/plot_kappa.png"
-
+                functions.plot_kappa(plotimage, epoch_list, train_kappa_list, val_kappa_list)
         f.close()
 
 print("Done")
