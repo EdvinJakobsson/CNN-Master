@@ -32,6 +32,8 @@ numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
 #dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
 dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 # essays = 12
 # kernel_numbers = [1]
@@ -42,9 +44,8 @@ dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.5
 # number_of_word_embeddings = 1
 # essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 # wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+#
 
-essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
@@ -60,11 +61,13 @@ print('Shape of target tensor:', targets.shape)
 
 train_kappa_dropout_list = []
 val_kappa_dropout_list = []
+os.makedirs("Results/graphs")
 
 for dropout in dropout_numbers:
     print("Dropout: ", dropout)
     folder = "Results/dropout" + str(dropout) + "/"
     os.makedirs(folder)
+
     for dense in dense_numbers:
         print("Dense: ", dense)
         file = folder + "layers2dense" + str(dense) + ".txt"
@@ -138,8 +141,8 @@ for dropout in dropout_numbers:
                 val_kappa_dropout_list.append(max_val_kappa)
                 f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
                 training_values.close()
-                plotimage = path + "/plot_kappa.png"
-                functions.plot_kappa(plotimage, epoch_list, train_kappa_list, val_kappa_list, x_axis="Epoch")
+                plotimage = "Results/graphs/" + str(dropout*20) + ".png"
+                functions.plot_kappa(plotimage, epoch_list, train_kappa_list, val_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
         f.close()
-functions.plot_kappa("Results/dropout_Kappa_graph.png", dropout_numbers, train_kappa_dropout_list, val_kappa_dropout_list, x_axis="Dropout")
+functions.plot_kappa("Results/dropout_Kappa_graph.png", dropout_numbers, train_kappa_dropout_list, val_kappa_dropout_list, title= "Overall Kappa", x_axis="Dropout")
 print("Done")
