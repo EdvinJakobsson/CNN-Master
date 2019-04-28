@@ -142,11 +142,11 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
     return embedding_layer
 
 
-def plot_kappa(filename, epochs, train_kappa, val_kappa):
+def plot_kappa(filename, epochs, train_kappa, val_kappa, x_axis):
     plt.plot(epochs,train_kappa, "r--", label='Training Kappa')
     plt.plot(epochs,val_kappa, label='Validation Kappa')
     plt.ylabel('Kappa')
-    plt.xlabel('Epoch')
+    plt.xlabel(x_axis)
     plt.ylim(-0.1,1)
     plt.legend()
     plt.savefig(filename)
