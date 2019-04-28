@@ -30,8 +30,9 @@ kernel_numbers = [100]
 kernel_length_number = [3]
 numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
+dropout_numbers = [0, 0.5, 0.9]
 #dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
-dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+#dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
 essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
@@ -40,11 +41,11 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 # kernel_length_number = [3]
 # numbers_of_kappa_measurements = 2
 # epochs_between_kappa = 1
-# dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+# dropout_numbers = [0, 0.1]
 # number_of_word_embeddings = 1
 # essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 # wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-#
+
 
 
 
@@ -87,7 +88,7 @@ for dropout in dropout_numbers:
                 if softmax_output:
                     model = functions.create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
                 else:
-                    model = models.CNN_sigmoidal_output(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+                    model = models.CNN_sigmoidal_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
 
 
                 min_train_loss = 1000
