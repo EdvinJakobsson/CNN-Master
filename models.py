@@ -1,6 +1,6 @@
 from keras.utils import to_categorical
-from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout, Flatten
+from keras.layers import Conv1D, MaxPooling1D, Embedding, BatchNormalization, Activation
 from keras.models import Model, Sequential
 from keras.initializers import Constant
 
@@ -47,17 +47,46 @@ def CNN_sigmoidal_output2(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
 
 
 
-
+        #batch normalization and global maxpooling
 def CNN_sigmoidal_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
 
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     model = Sequential()
     model.add(embedding_layer)
-    model.add(Conv1D(kernels, kernel_length, activation='relu'))
+    model.add(Dropout(dropout))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
     model.add(MaxPooling1D(5))
-    model.add(Conv1D(kernels, kernel_length, activation='relu'))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
     model.add(GlobalMaxPooling1D())
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='mse', optimizer="rmsprop", metrics=['accuracy'])
+
+    return model
+
+
+
+        #dropout at end with dense layer instead
+def CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
 
     return model
