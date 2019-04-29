@@ -32,21 +32,22 @@ numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
 #dropout_numbers = [0, 0.5]
 #dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
-dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+#dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+dropout_numbers = [0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
 essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-model_numbers = [3]
+model_numbers = [4]
 
-model_numbers = [3,4,2,5]
+# model_numbers = [4]
 # essays = 12
 # kernel_numbers = [1]
 # kernel_length_number = [3]
 # numbers_of_kappa_measurements = 2
 # epochs_between_kappa = 1
-# dropout_numbers = [0, 0.1]
+# dropout_numbers = [0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
 # number_of_word_embeddings = 1
-#essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-#wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 
@@ -66,10 +67,15 @@ print('Shape of target tensor:', targets.shape)
 
 
 for model_number in model_numbers:
-    os.makedirs("Results/model" + str(model_number) + "/graphs")
+    model_folder = "Results/model" + str(model_number)
+    os.makedirs(model_folder + "/graphs")
     print("model number: ", model_number)
     train_kappa_dropout_list = []
     val_kappa_dropout_list = []
+
+    dropout_values = open(model_folder + "/dropout_values.txt", "w+")
+    dropout_values.write("essays: 1246 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \r \r")
+    dropout_values.write("Dropout \t Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
     for dropout in dropout_numbers:
         print("Dropout: ", dropout)
@@ -154,9 +160,12 @@ for model_number in model_numbers:
                     train_kappa_dropout_list.append(max_train_kappa)
                     val_kappa_dropout_list.append(max_val_kappa)
                     f.write("%.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
+
                     training_values.close()
                     plotimage = "Results/model" + str(model_number) + "/graphs/" + str(dropout*20) + ".png"
                     functions.plot_kappa(plotimage, epoch_list, train_kappa_list, val_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
             f.close()
+        dropout_values.write("%.3f \t %.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (dropout, kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
+    dropout_values.close()
     functions.plot_kappa("Results/model" + str(model_number) + "/dropout_Kappa_graph.png", dropout_numbers, train_kappa_dropout_list, val_kappa_dropout_list, title= "Overall Kappa", x_axis="Dropout")
 print("Done")
