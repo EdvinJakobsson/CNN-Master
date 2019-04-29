@@ -1,9 +1,27 @@
-import os
+import reader_full
+#import functions
 
-import functions
+asap_ranges = {
+0: (0, 60),
+1: (2, 12),
+2: (1, 6),
+3: (0, 3),
+4: (0, 3),
+5: (0, 4),
+6: (0, 4),
+7: (0, 30),
+8: (0, 60)
+}
 
-l1 = [1,2,3]
-l2 = [4,2,4]
-l3 = [2,5,9]
+essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+data = reader_full.read_dataset([1], filepath=essayfile)
 
-functions.plot_kappa(l1,l2,l3)
+a = int(len(data)*0.7)
+data = data[:a]
+
+print(type(asap_ranges[0]))
+
+b = asap_ranges[0][1]
+#b = b[0]
+print(b)

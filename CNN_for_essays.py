@@ -20,7 +20,7 @@ MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 essayset = 1
-essays = 1246
+essays = 1248
 number_of_word_embeddings = -1   #all of them
 
 softmax_output = False
@@ -33,10 +33,10 @@ epochs_between_kappa = 10
 #dropout_numbers = [0, 0.5]
 #dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
 #dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
-dropout_numbers = [0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
+dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
 essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-model_numbers = [4]
+model_numbers = [6]
 
 # model_numbers = [4]
 # essays = 12
@@ -48,8 +48,6 @@ model_numbers = [4]
 # number_of_word_embeddings = 1
 # essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 # wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-
-
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
@@ -108,6 +106,8 @@ for model_number in model_numbers:
                         model = models.CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
                     elif(model_number==5):
                         model = models.CNN_sigmoidal_output5(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+                    elif(model_number==6):
+                        model = models.CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
 
 
                     min_train_loss = 1000
@@ -136,8 +136,8 @@ for model_number in model_numbers:
                         val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output)
 
                         training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
-                        savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
-                        functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)
+                        #savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
+                        #functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)
 
                         epoch_list.append(i*epochs_between_kappa)
                         train_kappa_list.append(train_kappa)
