@@ -38,16 +38,16 @@ essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.ts
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 model_numbers = [6]
 
-# model_numbers = [4]
-# essays = 12
-# kernel_numbers = [1]
-# kernel_length_number = [3]
-# numbers_of_kappa_measurements = 2
-# epochs_between_kappa = 1
-# dropout_numbers = [0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
-# number_of_word_embeddings = 1
-# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+model_numbers = [4]
+essays = 12
+kernel_numbers = [1]
+kernel_length_number = [3]
+numbers_of_kappa_measurements = 2
+epochs_between_kappa = 1
+dropout_numbers = [0.85, 0.90, 0.95, 0.97, 0.99, 0.999]
+number_of_word_embeddings = 1
+essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)

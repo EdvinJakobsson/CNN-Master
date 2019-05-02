@@ -78,7 +78,7 @@ for model_number in model_numbers:
     val_kappa_dropout_list = []
 
     dropout_values = open(model_folder + "/dropout_values.txt", "w+")
-    dropout_values.write("essays: 1246 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \r \r")
+    dropout_values.write("essays: 1248 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \r \r")
     dropout_values.write("Dropout \t Kernel length  \t kernels \t min train loss \t top train acc \t min val loss \t top val acc \t top train kappa \t top val kappa \t epoch at top val kappa \r")
 
     for dropout in dropout_numbers:
@@ -90,7 +90,7 @@ for model_number in model_numbers:
             print("Dense: ", dense)
             file = folder + "layers2dense" + str(dense) + ".txt"
             f = open(file, "w+")
-            f.write("essays: 1246 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t  Dropout: " + str(dropout) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \t \t dense: " + str(dense) + " \r \r")
+            f.write("essays: 1248 \t \t epochs: " + str(numbers_of_kappa_measurements*epochs_between_kappa) + " \t \t  Dropout: " + str(dropout) + " \t \t k-fold: no \t \t batch size: 10 \t\t layers: 2 \t \t softmax_output: " + str(softmax_output) + " \t \t dense: " + str(dense) + " \r \r")
 
             for kernel_length in kernel_length_number:
                 print("kernel length: ", kernel_length)
