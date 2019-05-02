@@ -300,7 +300,6 @@ def argmax(x_val, d_val, essayset, model, output):
             targets.append(int(d_val[i]))
     else:
         print("argmax: something wrong with 'output' value")
-    print(predictions)
     return(predictions, targets)
 
 
