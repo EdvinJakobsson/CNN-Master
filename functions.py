@@ -41,11 +41,61 @@ def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_outp
     y_test, d_test = argmax(x_val, d_val, essayset, model, softmax_output)
     kappa = quadratic_weighted_kappa(d_test, y_test)
 
-
     return kappa
+
+
+def argmax(x_val, d_val, essayset, model, output):
+    asap_ranges = {
+    0: (0, 60),
+    1: (2, 12),
+    2: (1, 6),
+    3: (0, 3),
+    4: (0, 3),
+    5: (0, 4),
+    6: (0, 4),
+    7: (0, 30),
+    8: (0, 60)
+    }
+    essayset = essayset[0]
+    max_score = asap_ranges[essayset][1] - asap_ranges[essayset][0]
+
+    p = model.predict([x_val])
+    predictions = []
+    targets = []
+    if output == 'softmax':
+        for i in range(len(x_val)):
+            predictions.append(np.argmax(p[i]))
+            targets.append(np.argmax(d_val[i]))
+    elif(output == 'sigmoid'):
+        for i in range(len(x_val)):
+            predictions.append(int(p[i]*max_score+0.5))
+            targets.append(int(d_val[i]*max_score))
+    elif(output == 'linear'):
+        for i in range(len(x_val)):
+            predictions.append(int(p[i]+0.5))
+            targets.append(int(d_val[i]))
+    else:
+        print("argmax: something wrong with 'output' value")
+    return(predictions, targets)
+
+
+
 
 def process_texts(data, output, essays):
     print('Processing text dataset')
+    asap_ranges = {
+    0: (0, 60),
+    1: (2, 12),
+    2: (1, 6),
+    3: (0, 3),
+    4: (0, 3),
+    5: (0, 4),
+    6: (0, 4),
+    7: (0, 30),
+    8: (0, 60)
+    }
+    essayset = essays[0]
+    range = asap_ranges[essayset]
     texts = []  # list of text samples
     essaysetlist  = [] #list of which set each text belongs to
     essaynumber = []
@@ -55,16 +105,15 @@ def process_texts(data, output, essays):
         texts.append(row[2])
         essaysetlist.append(int(row[1]))
         essaynumber.append(int(row[0]))
-        if essays == [1]:
-            targets.append(int(row[6])-2) #changing grades from 2-12 to 0-10
+        targets.append(int(row[6])-range[0]) #changing grades to start at 0
+
     if(output == 'softmax'):
         targets = to_categorical(np.asarray(targets)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
     elif(output == 'linear'):
         targets = np.array(targets)
     elif(output == 'sigmoid'):
-        if essays == [1]:
-            targets = [x / 10 for x in targets]
-            targets = np.array(targets)
+        targets = [x / (range[1]-range[0]) for x in targets]
+        targets = np.array(targets)
 
     essaysetlist = np.array(essaysetlist)
     essaynumber = np.array(essaynumber)
@@ -276,31 +325,6 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     return ax
 
 
-
-def argmax(x_val, d_val, essayset, model, output):
-    if essayset == 1:
-        max_score = 10
-    else:
-        print("argmax: Wrong essayset input!")
-
-    p = model.predict([x_val])
-    predictions = []
-    targets = []
-    if output == 'softmax':
-        for i in range(len(x_val)):
-            predictions.append(np.argmax(p[i]))
-            targets.append(np.argmax(d_val[i]))
-    elif(output == 'sigmoid'):
-        for i in range(len(x_val)):
-            predictions.append(int(p[i]*max_score+0.5))
-            targets.append(int(d_val[i]*max_score))
-    elif(output == 'linear'):
-        for i in range(len(x_val)):
-            predictions.append(int(p[i]+0.5))
-            targets.append(int(d_val[i]))
-    else:
-        print("argmax: something wrong with 'output' value")
-    return(predictions, targets)
 
 
 

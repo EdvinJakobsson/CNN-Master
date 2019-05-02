@@ -19,8 +19,7 @@ MAX_SEQUENCE_LENGTH = 1000
 MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
-essayset = 1
-essays = [1]
+essayset = [1]
 number_of_word_embeddings = -1   #all of them
 
 softmax_output = False
@@ -44,7 +43,7 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 # output = 'linear'       #linear, sigmoid or softmax
 # dense_numbers = [1]
 # model_numbers = [1]
-# essays = [1]
+# essayset = [1]
 # kernel_numbers = [1]
 # kernel_length_number = [3]
 # numbers_of_kappa_measurements = 2
@@ -56,17 +55,16 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
-data = reader_full.read_dataset(essays, filepath=essayfile)
+data = reader_full.read_dataset(essayset, filepath=essayfile)
 data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
-texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essays)
+texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essayset)
 sequences, word_index = functions.texts_to_sequences(MAX_NUM_WORDS, texts)
 MAX_SEQUENCE_LENGTH = min(MAX_SEQUENCE_LENGTH, functions.longest_text(sequences))
 pad_sequences = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) #adds zeros to beginning of text if it is shorter than MAX_SEQUENCE_LENGTH
 
+
 print('Shape of data tensor:', pad_sequences.shape)
 print('Shape of target tensor:', targets.shape)
-
-
 
 
 
