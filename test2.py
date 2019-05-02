@@ -57,7 +57,7 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
 data = reader_full.read_dataset(essays, filepath=essayfile)
-data = data[:int(len(data)*0.7)]
+data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
 texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essays)
 sequences, word_index = functions.texts_to_sequences(MAX_NUM_WORDS, texts)
 MAX_SEQUENCE_LENGTH = min(MAX_SEQUENCE_LENGTH, functions.longest_text(sequences))
@@ -130,15 +130,8 @@ for model_number in model_numbers:
                         model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
                         train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
                         val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
-                        train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, essayset, model, softmax_output)
-                        val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output)
-                        pred = model.predict(x_val)
-                        list = []
-                        list2 = []
-                        for i in range(len(x_val)):
-                            list.append(float(pred[i]))
-                        print(list)
-                        #instances = list(dict.fromkeys(list1))
+                        train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, essayset, model, output)
+                        val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, output)
                         training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
                         #savefile = path + "/dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * i)
                         #functions.save_confusion_matrix(savefile, x_val, d_val, model, essayset, softmax_output)

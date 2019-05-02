@@ -277,7 +277,7 @@ def plot_confusion_matrix(y_true, y_pred, classes,
 
 
 
-def argmax(x_val, d_val, essayset, model, softmax_output):
+def argmax(x_val, d_val, essayset, model, output):
     if essayset == 1:
         max_score = 10
     else:
@@ -286,15 +286,21 @@ def argmax(x_val, d_val, essayset, model, softmax_output):
     p = model.predict([x_val])
     predictions = []
     targets = []
-    if softmax_output:
+    if output == 'softmax':
         for i in range(len(x_val)):
             predictions.append(np.argmax(p[i]))
             targets.append(np.argmax(d_val[i]))
-    else:
+    elif(output == 'sigmoid'):
         for i in range(len(x_val)):
             predictions.append(int(p[i]*max_score+0.5))
             targets.append(int(d_val[i]*max_score))
-
+    elif(output == 'linear'):
+        for i in range(len(x_val)):
+            predictions.append(int(p[i]+0.5))
+            targets.append(int(d_val[i]))
+    else:
+        print("argmax: something wrong with 'output' value")
+        
     return(predictions, targets)
 
 

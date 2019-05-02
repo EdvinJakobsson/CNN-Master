@@ -27,3 +27,7 @@ instances = list(dict.fromkeys(list1))
 
 kappas = [0, 0.99]
 c = mean_quadratic_weighted_kappa(kappas)
+
+list = [0.424, 0.76, 6.012, 6.99]
+listb = [int(x+0.5) for x in list]
+print(listb)
