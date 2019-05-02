@@ -20,7 +20,7 @@ MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 essayset = 1
-essays = 1248
+essays = [1]
 number_of_word_embeddings = -1   #all of them
 
 softmax_output = False
@@ -57,6 +57,7 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
 data = reader_full.read_dataset(essays, filepath=essayfile)
+data = data[:int(len(data)*0.7)]
 texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essays)
 sequences, word_index = functions.texts_to_sequences(MAX_NUM_WORDS, texts)
 MAX_SEQUENCE_LENGTH = min(MAX_SEQUENCE_LENGTH, functions.longest_text(sequences))
