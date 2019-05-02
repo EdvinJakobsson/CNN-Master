@@ -1,4 +1,6 @@
 import reader_full
+import numpy
+from BenHamner.score import mean_quadratic_weighted_kappa
 #import functions
 
 asap_ranges = {
@@ -15,13 +17,13 @@ asap_ranges = {
 
 essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-data = reader_full.read_dataset([1], filepath=essayfile)
+data = reader_full.read_dataset([3], filepath=essayfile)
 
 a = int(len(data)*0.7)
 data = data[:a]
+b = asap_ranges[2][1]
+list1 = [x[6] for x in data]
+instances = list(dict.fromkeys(list1))
 
-print(type(asap_ranges[0]))
-
-b = asap_ranges[0][1]
-#b = b[0]
-print(b)
+kappas = [0, 0.99]
+c = mean_quadratic_weighted_kappa(kappas)

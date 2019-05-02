@@ -5,6 +5,21 @@ from keras.models import Model, Sequential
 from keras.initializers import Constant
 
 
+def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
+
+    if output == 'linear':
+        if model_number == 1:
+            model = CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+
+    elif output == 'sigmoid':
+        if model_number == 2:
+            model = CNN_sigmoidal_output2(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+
+    else:
+        print("Create_model function: No model was found.")
+    return model
+
+
 def CNN_sigmoidal_output(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
 
     # train a 1D convnet with global maxpooling
@@ -113,7 +128,7 @@ def CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
         return model
 
 
-                #dropout at end with dense layer with fre nodes
+                #dropout at end with dense layer with few nodes
 def CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
 
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
@@ -131,6 +146,31 @@ def CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
     model.add(Dense(12, activation='sigmoid'))
     model.add(Dropout(dropout))
     model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
+
+
+
+
+
+def CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='linear'))
     model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
 
     return model

@@ -44,7 +44,7 @@ def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_outp
 
     return kappa
 
-def process_texts(data, softmax_output):
+def process_texts(data, output, essays):
     print('Processing text dataset')
     texts = []  # list of text samples
     essaysetlist  = [] #list of which set each text belongs to
@@ -55,12 +55,16 @@ def process_texts(data, softmax_output):
         texts.append(row[2])
         essaysetlist.append(int(row[1]))
         essaynumber.append(int(row[0]))
-        targets.append(int(row[6])-2) #changing grades from 2-13 to 0-11
-    if(softmax_output):
+        if essays == [1]:
+            targets.append(int(row[6])-2) #changing grades from 2-12 to 0-10
+    if(output == 'softmax'):
         targets = to_categorical(np.asarray(targets)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
-    else:
-        targets = [x / 10 for x in targets]
+    elif(output == 'linear'):
         targets = np.array(targets)
+    elif(output == 'sigmoid'):
+        if essays == [1]:
+            targets = [x / 10 for x in targets]
+            targets = np.array(targets)
 
     essaysetlist = np.array(essaysetlist)
     essaynumber = np.array(essaynumber)
