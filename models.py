@@ -10,10 +10,18 @@ def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, lay
     if output == 'linear':
         if model_number == 1:
             model = CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+        if model_number == 4:
+            model = CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+        if model_number == 7:
+            model = CNN_linear_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
 
     elif output == 'sigmoid':
         if model_number == 2:
             model = CNN_sigmoidal_output2(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+        if model_number == 4:
+            model = CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+        if model_number == 7:
+            model = CNN_sigmoidal_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
 
     else:
         print("Create_model function: No model was found.")
@@ -146,6 +154,25 @@ def CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
 
     return model
 
+    #no batch normalizaton, but 128 dense layer
+def CNN_sigmoidal_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
 
 def CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
 
@@ -158,6 +185,48 @@ def CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     model.add(MaxPooling1D(5))
     model.add(Conv1D(kernels, kernel_length))
     model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='linear'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
+
+    #same as model 1
+def CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='linear'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
+
+    #no batch normalization
+def CNN_linear_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
+
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
     model.add(Activation("relu"))
     model.add(MaxPooling1D(5))
     model.add(Flatten())
