@@ -37,8 +37,8 @@ def read_word_vectors(filepath, stop = -1):
     return embeddings_index
 
 
-def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, softmax_output):
-    y_test, d_test = argmax(x_val, d_val, essayset, model, softmax_output)
+def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, output):
+    y_test, d_test = argmax(x_val, d_val, essayset, model, output)
     kappa = quadratic_weighted_kappa(d_test, y_test)
 
     return kappa
@@ -76,9 +76,8 @@ def argmax(x_val, d_val, essayset, model, output):
             targets.append(int(d_val[i]))
     else:
         print("argmax: something wrong with 'output' value")
+    #print(predictions)
     return(predictions, targets)
-
-
 
 
 def process_texts(data, output, essays):
@@ -207,7 +206,6 @@ def plot_kappa(filename, epochs, train_kappa, val_kappa, title, x_axis):
     plt.close()
 
 
-
 def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1, dropout=0, maxpooling = 5):
 
     # train a 1D convnet with global maxpooling
@@ -229,9 +227,6 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
                   metrics=['acc'])
 
     return model
-
-
-
 
 
 def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1):
@@ -264,6 +259,31 @@ def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels =
     return model
 
 
+
+def save_confusion_matrix(savefile, x, d, model, essayset, output, title=None):
+    predictions, targets = argmax(x, d, essayset, model, output)
+    asap_ranges = {
+    0: (0, 60),
+    1: (2, 12),
+    2: (1, 6),
+    3: (0, 3),
+    4: (0, 3),
+    5: (0, 4),
+    6: (0, 4),
+    7: (0, 30),
+    8: (0, 60)
+    }
+    essayset = essayset[0]
+    min_score = asap_ranges[essayset][0]
+    max_score = asap_ranges[essayset][1]
+
+    class_names = np.array(min_score)
+    for i in range(min_score+1, max_score+1):
+        class_names = np.append(class_names, i)
+
+    plot = plot_confusion_matrix(targets, predictions, classes=class_names, title=title)
+    plt.savefig(savefile)
+    plt.close()
 
 
 
@@ -323,21 +343,3 @@ def plot_confusion_matrix(y_true, y_pred, classes,
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
     return ax
-
-
-
-
-
-def save_confusion_matrix(savefile, x, d, model, essayset, softmax_output, title=None):
-    if essayset==1:
-        lowest_score = 2
-        highest_score = 12
-
-    predictions, targets = argmax(x, d, essayset, model, softmax_output)
-    class_names = np.array(lowest_score)
-    for i in range(lowest_score+1,highest_score+1):
-        class_names = np.append(class_names, i)
-
-    plot = plot_confusion_matrix(targets, predictions, classes=class_names, title=title)
-    plt.savefig(savefile)
-    plt.close()

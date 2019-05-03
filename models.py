@@ -56,8 +56,6 @@ def CNN_sigmoidal_output2(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
     return model
 
 
-
-
         #batch normalization and global maxpooling
 def CNN_sigmoidal_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
 
@@ -77,7 +75,6 @@ def CNN_sigmoidal_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
     model.compile(loss='mse', optimizer="rmsprop", metrics=['accuracy'])
 
     return model
-
 
 
         #dropout at end with dense layer instead
@@ -104,28 +101,27 @@ def CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
 
 
         #dropout at end with dense layer instead, two dense layers
-    def CNN_sigmoidal_output5(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
+def CNN_sigmoidal_output5(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dropout = 0):
 
-        sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-        model = Sequential()
-        model.add(embedding_layer)
-        model.add(Conv1D(kernels, kernel_length))
-        model.add(BatchNormalization())
-        model.add(Activation("relu"))
-        model.add(MaxPooling1D(5))
-        model.add(Conv1D(kernels, kernel_length))
-        model.add(BatchNormalization())
-        model.add(Activation("relu"))
-        model.add(MaxPooling1D(5))
-        model.add(Flatten())
-        model.add(Dense(128, activation='sigmoid'))
-        model.add(Dropout(dropout))
-        model.add(Dense(128, activation='sigmoid'))
-        model.add(Dropout(dropout))
-        model.add(Dense(1, activation='sigmoid'))
-        model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
-
-        return model
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+    return model
 
 
                 #dropout at end with dense layer with few nodes
@@ -149,9 +145,6 @@ def CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kern
     model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
 
     return model
-
-
-
 
 
 def CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):

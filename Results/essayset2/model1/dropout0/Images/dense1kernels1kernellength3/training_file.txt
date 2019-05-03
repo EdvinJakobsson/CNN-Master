@@ -1,0 +1,1 @@
+epoch 	 train loss 	 train acc 	 val loss 	 val acc 	 train kappa 	 val kappa 1 	 5.93 	  0.01 	 6.07  	  0.02  	  0.000  	  0.000 2 	 5.46 	  0.01 	 5.60  	  0.02  	  0.000  	  0.000 

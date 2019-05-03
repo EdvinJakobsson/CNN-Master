@@ -1,7 +1,9 @@
 import reader_full
-import numpy
-from BenHamner.score import mean_quadratic_weighted_kappa
+import numpy as np
+#from BenHamner.score import mean_quadratic_weighted_kappa
 #import functions
+#from keras.preprocessing.sequence import pad_sequences
+#import keras
 
 asap_ranges = {
 0: (0, 60),
@@ -17,7 +19,7 @@ asap_ranges = {
 
 essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-data = reader_full.read_dataset([1], filepath=essayfile)
+data = reader_full.read_dataset([8], filepath=essayfile)
 
 a = int(len(data)*0.7)
 data = data[:a]
@@ -29,7 +31,21 @@ list1 = []
 for i in range(len(targets)):
     list1.append(targets[i])
 instances = list(dict.fromkeys(list1))
-print(instances)
+#print(instances)
 
 kappas = [0, 0.99]
-c = mean_quadratic_weighted_kappa(kappas)
+#c = mean_quadratic_weighted_kappa(kappas)
+
+
+
+for i in range(2):
+
+    sequences = [[1,2,3,4],[1,5,4],[2,3]]
+    MAX_SEQUENCE_LENGTH = 3
+
+    #pad_sequences = keras.preprocessing.sequence.pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    #print(pad_sequences)
+
+print(data[1])
+print(data[2])
+print(data[3])

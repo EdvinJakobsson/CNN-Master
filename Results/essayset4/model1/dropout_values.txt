@@ -1,0 +1,1 @@
+essayset: 4 	 	 epochs: 2 	 	 k-fold: no 	 	 batch size: 10 		 layers: 2 	 	 output: linear  Dropout 	 Kernel length  	 kernels 	 min train loss 	 top train acc 	 min val loss 	 top val acc 	 top train kappa 	 top val kappa 	 epoch at top val kappa 0.000 	 3 	 1 	 1.53 	  0.36 	 1.57  	  0.38  	  0.035  	  0.033  	  1 
