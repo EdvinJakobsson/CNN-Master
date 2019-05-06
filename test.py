@@ -46,6 +46,7 @@ for i in range(2):
     #pad_sequences = keras.preprocessing.sequence.pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
     #print(pad_sequences)
 
-print(data[1])
-print(data[2])
-print(data[3])
+essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+
+essays = [i[0] for i in essaysets]
+print(essays)

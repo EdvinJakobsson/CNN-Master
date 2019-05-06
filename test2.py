@@ -16,24 +16,24 @@ from keras.initializers import Constant
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'    #removes some of the tf warnings
 
-
-essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+essaysets = [[1]]
+#essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
 VALIDATION_SPLIT = 0.2
 number_of_word_embeddings = -1   #all of them
-outputs = ['linear', 'sigmoid']       #linear, sigmoid or softmax
-model_numbers = [4]
+outputs = ['linear']       #linear, sigmoid or softmax
+model_numbers = [3]
 trainable_embeddings = False
-dense_numbers = [100]
+dense_numbers = [128]
 kernel_numbers = [100]
 kernel_length_number = [3]
 numbers_of_kappa_measurements = 20
 epochs_between_kappa = 10
-dropout_numbers = [0.5]
+#dropout_numbers = [0.5]
 #dropout_numbers = [0, 0.5, 0.99]
-#dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
+dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
 #dropout_numbers = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99]
 essayfile = "/home/william/m18_edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
@@ -41,15 +41,15 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 
 # essaysets = [[1]]
-# outputs = ['linear', 'sigmoid']       #linear, sigmoid or softmax
-# model_numbers = [4,7]
-#dense_numbers = [1]
-#kernel_numbers = [1]
+# outputs = ['linear']       #linear, sigmoid or softmax
+# model_numbers = [4]
+# dense_numbers = [128]
+# kernel_numbers = [100]
 # kernel_length_number = [3]
-#numbers_of_kappa_measurements = 2
-#epochs_between_kappa = 1
-#dropout_numbers = [0]
-#number_of_word_embeddings = 1
+# numbers_of_kappa_measurements = 2
+# epochs_between_kappa = 1
+# dropout_numbers = [0]
+# number_of_word_embeddings = 1
 # essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
 # wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
@@ -113,7 +113,6 @@ for output in outputs:
                             else:
                                 model = models.create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
 
-
                             min_train_loss = 1000
                             max_train_acc = 0
                             min_val_loss = 1000
@@ -173,14 +172,9 @@ for output in outputs:
                 dropout_values.write("%.3f \t %.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (dropout, kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
             dropout_values.close()
             functions.plot_kappa(modelfolder + "/dropout_Kappa_graph.png", dropout_numbers, train_kappa_dropout_list, val_kappa_dropout_list, title= "Overall Kappa", x_axis="Dropout")
-    
-    essays = [1,2,3,4,5,6,7,8]
-    functions.plot_kappa(outputfolder + "/essay_Kappa_graph.png", essays, total_kappa, total_kappa, title= "Overall Kappa", x_axis="essay set")
+
+    #essays = [i[0] for i in essaysets]
+    #functions.plot_kappa(outputfolder + "/essay_Kappa_graph.png", essays, total_kappa, total_kappa, title= "Overall Kappa", x_axis="essay set")
     total_kappa_values.close()
-    
+
 print("Done")
-
-
-
-
-
