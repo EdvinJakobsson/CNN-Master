@@ -8,6 +8,7 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout
 from keras.models import Model
 from keras.initializers import Constant
 from BenHamner.score import quadratic_weighted_kappa
+import reader_full
 import matplotlib.pyplot as plt
 
 from sklearn import svm, datasets
@@ -260,6 +261,22 @@ def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels =
 
 
 
+
+
+
+
+def human_raters_agreement():
+     data = reader_full.read_dataset(essayset, filepath=essayfile)
+     rater1 = np.zeros((number_of_essays, 0))
+     rater2 = np.zeros((number_of_essays, 0))
+     rater1 = extract.score(rater1, 3, data)
+     rater2 = extract.score(rater2, 4, data)
+     human_raters_agreement = extra_functions.quadratic_weighted_kappa_score(rater1, rater2)
+     return human_raters_agreement
+
+
+
+
 def save_confusion_matrix(savefile, x, d, model, essayset, output, title=None):
     predictions, targets = argmax(x, d, essayset, model, output)
     asap_ranges = {
@@ -284,10 +301,6 @@ def save_confusion_matrix(savefile, x, d, model, essayset, output, title=None):
     plot = plot_confusion_matrix(targets, predictions, classes=class_names, title=title)
     plt.savefig(savefile)
     plt.close()
-
-
-
-
 
 
 

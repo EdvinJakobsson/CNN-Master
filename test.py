@@ -1,6 +1,6 @@
 import reader_full
 import numpy as np
-#from BenHamner.score import mean_quadratic_weighted_kappa
+from BenHamner.score import mean_quadratic_weighted_kappa
 #import functions
 #from keras.preprocessing.sequence import pad_sequences
 #import keras
@@ -33,8 +33,6 @@ for i in range(len(targets)):
 instances = list(dict.fromkeys(list1))
 #print(instances)
 
-kappas = [0, 0.99]
-#c = mean_quadratic_weighted_kappa(kappas)
 
 
 
@@ -46,7 +44,16 @@ for i in range(2):
     #pad_sequences = keras.preprocessing.sequence.pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
     #print(pad_sequences)
 
-essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 
-essays = [i[0] for i in essaysets]
-print(essays)
+
+kappas = [0.699317707600,
+0.593523878437,
+0.689088989953,
+0.756884978051,
+0.807425213675,
+0.753842146392,
+0.655199491034,
+0.372994351203
+]
+c = mean_quadratic_weighted_kappa(kappas)
+print(c)

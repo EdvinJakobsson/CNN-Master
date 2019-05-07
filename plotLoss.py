@@ -13,11 +13,12 @@ from keras.layers import Dense, Input, GlobalMaxPooling1D
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 from keras.initializers import Constant
+from BenHamner.score import mean_quadratic_weighted_kappa
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'    #removes some of the tf warnings
 
-essaysets = [[8]]
-#essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+#essaysets = [[1]]
+essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
@@ -26,11 +27,11 @@ number_of_word_embeddings = -1   #all of them
 outputs = ['linear']       #linear, sigmoid or softmax
 model_numbers = [4]
 trainable_embeddings = False
-dense_numbers = [10,50,100,200]
+dense_numbers = [100]
 kernel_numbers = [100]
-kernel_length_number = [3,5,10]
-numbers_of_kappa_measurements = 20
-epochs_between_kappa = 10
+kernel_length_number = [3]
+numbers_of_kappa_measurements = 100
+epochs_between_kappa = 2
 dropout_numbers = [0.5]
 #dropout_numbers = [0, 0.5, 0.99]
 #dropout_numbers = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]
@@ -40,18 +41,18 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 
 
-#essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
-outputs = ['linear']       #linear, sigmoid or softmax
-model_numbers = [4]
-#dense_numbers = [1]
-#kernel_numbers = [1]
-#kernel_length_number = [3]
-numbers_of_kappa_measurements = 2
-epochs_between_kappa = 1
-dropout_numbers = [0.5]
-number_of_word_embeddings = 1
-essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+# essaysets = [[1]]
+# outputs = ['linear']       #linear, sigmoid or softmax
+# model_numbers = [4]
+# dense_numbers = [128]
+# kernel_numbers = [100]
+# kernel_length_number = [3]
+# numbers_of_kappa_measurements = 2
+# epochs_between_kappa = 1
+# dropout_numbers = [0]
+# number_of_word_embeddings = 1
+# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 
@@ -78,7 +79,8 @@ for output in outputs:
 
         for model_number in model_numbers:
             modelfolder = essayfolder + "/model" + str(model_number)
-            os.makedirs(modelfolder + "/graphs")
+            os.makedirs(modelfolder + "/dropout_graphs")
+            os.makedirs(modelfolder + "/loss_graphs")
             print("model number: ", model_number)
             train_kappa_dropout_list = []
             val_kappa_dropout_list = []
@@ -130,6 +132,8 @@ for output in outputs:
                             epoch_list = []
                             train_kappa_list = []
                             val_kappa_list = []
+                            train_loss_list = []
+                            val_loss_list = []
                             for i in range(1, numbers_of_kappa_measurements+1):
                                 print("Epoch: " + str(i*epochs_between_kappa))
                                 model.fit(x_train, d_train, batch_size=10, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
@@ -143,6 +147,8 @@ for output in outputs:
                                 epoch_list.append(i*epochs_between_kappa)
                                 train_kappa_list.append(train_kappa)
                                 val_kappa_list.append(val_kappa)
+                                train_loss_list.append(train_loss)
+                                val_loss_list.append(val_loss)
 
                                 if min_train_loss > train_loss:
                                     min_train_loss = train_loss
@@ -166,8 +172,10 @@ for output in outputs:
                             total_kappa.append(max_val_kappa)
                             total_kappa_values.write(str(max_val_kappa) + "\r")
                             training_values.close()
-                            plotimage = modelfolder + "/graphs/" + str(dropout*20) + ".png"
-                            functions.plot_kappa(plotimage, epoch_list, train_kappa_list, val_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
+                            plot_dropout = modelfolder + "/dropout_graphs/" + str(dropout*20) + ".png"
+                            functions.plot_kappa(plot_dropout, epoch_list, train_kappa_list, val_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
+                            plot_loss = modelfolder + "/loss_graphs/" + str(dropout*20) + ".png"
+                            functions.plot_loss(plot_loss, epoch_list, train_loss_list, val_loss_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
                     f.close()
                 dropout_values.write("%.3f \t %.0f \t %.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f  \t  %.0f \r" % (dropout, kernel_length, kernels, min_train_loss, max_train_acc, min_val_loss, max_val_acc, max_train_kappa, max_val_kappa, epoch))
             dropout_values.close()
@@ -175,6 +183,8 @@ for output in outputs:
 
     essays = [i[0] for i in essaysets]
     functions.plot_kappa(outputfolder + "/essay_Kappa_graph.png", essays, total_kappa, total_kappa, title= "Overall Kappa", x_axis="essay set")
+    mean_kappa = mean_quadratic_weighted_kappa(total_kappa)
+    total_kappa_values.write("\r \r" + str(mean_kappa))
     total_kappa_values.close()
 
 print("Done")

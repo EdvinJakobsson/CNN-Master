@@ -249,7 +249,7 @@ def CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     model.add(Dropout(dropout))
     model.add(Dense(1, activation='linear'))
     model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
-    print("model 4 linear complete")
+    print("model 4 linear created")
     return model
 
     #dropout at end with dense layer with few nodes
