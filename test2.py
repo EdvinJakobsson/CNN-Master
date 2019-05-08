@@ -17,7 +17,7 @@ from keras.initializers import Constant
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'    #removes some of the tf warnings
 
 essaysets = [[8]]
-#essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NUM_WORDS = 100000
 EMBEDDING_DIM = 100
@@ -40,12 +40,12 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 
 
-#essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 outputs = ['linear']       #linear, sigmoid or softmax
 model_numbers = [4]
-#dense_numbers = [1]
-#kernel_numbers = [1]
-#kernel_length_number = [3]
+dense_numbers = [1]
+kernel_numbers = [1]
+kernel_length_number = [3]
 numbers_of_kappa_measurements = 2
 epochs_between_kappa = 1
 dropout_numbers = [0.5]
@@ -66,7 +66,6 @@ for output in outputs:
     for essayset in essaysets:
         print("Essayset: ", essayset)
         essayfolder = outputfolder + "/essayset" + str(essayset[0])
-
         data = reader_full.read_dataset(essayset, filepath=essayfile)
         data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
         texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essayset)

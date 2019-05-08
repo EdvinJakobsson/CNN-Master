@@ -8,6 +8,7 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout
 from keras.models import Model
 from keras.initializers import Constant
 from BenHamner.score import quadratic_weighted_kappa
+from BenHamner.score import mean_quadratic_weighted_kappa
 import reader_full
 import matplotlib.pyplot as plt
 
@@ -144,10 +145,11 @@ def longest_text(texts):
 
 
 # split the data into a training set and a validation set
-def split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT):
+def split_data(pad_sequences, essayset, essaynumber, targets, VALIDATION_SPLIT, randomize_data):
 
     indices = np.arange(pad_sequences.shape[0]) #creates an array with integers up to the total number of texts (data.shape[0]). ex: [0  1  2  3 ... 1998  1999]
-    np.random.shuffle(indices)
+    if randomize_data:
+        np.random.shuffle(indices)
     pad_sequences = pad_sequences[indices]
     essayset = essayset[indices]
     essaynumber = essaynumber[indices]
@@ -195,12 +197,25 @@ def embedding_layer(MAX_NUM_WORDS, MAX_SEQUENCE_LENGTH, word_index, EMBEDDING_DI
     return embedding_layer
 
 
-def plot_kappa(filename, epochs, train_kappa, val_kappa, title, x_axis):
-    plt.plot(epochs,train_kappa, "r--", label='Training Kappa')
+def plot_kappa(filename, epochs, val_kappa, train_kappa = None, title = "", x_axis = ""):
     plt.plot(epochs,val_kappa, label='Validation Kappa')
+    if train_kappa != None:
+        plt.plot(epochs,train_kappa, "r--", label='Training Kappa')
+    plt.legend()
     plt.ylabel('Kappa')
     plt.xlabel(x_axis)
     plt.ylim(-0.1,1)
+    plt.title(title)
+
+    plt.savefig(filename)
+    plt.close()
+
+def plot_loss(filename, epochs, train_loss, val_loss, title, x_axis):
+    plt.plot(epochs,train_loss, "r--", label='Training Loss')
+    plt.plot(epochs,val_loss, label='Validation Loss')
+    plt.ylabel('Loss')
+    plt.xlabel(x_axis)
+    #plt.ylim(0,3)
     plt.title(title)
     plt.legend()
     plt.savefig(filename)
@@ -230,51 +245,36 @@ def create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, 
     return model
 
 
-def create_model_two(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1):
-
-    print('Creating model...')
-    # train a 1D convnet with global maxpooling
-    from keras.models import Sequential
-    from keras.layers import Dense, Dropout
-    from keras.layers import Embedding
-    from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
-
-    seq_length = 783
-
-    model = Sequential()
-    model.add(Conv1D(1, 1, activation='relu', input_shape=(seq_length,100)))
-    model.add(MaxPooling1D(5))
-    model.add(Conv1D(1, 1, activation='relu'))
-    model.add(MaxPooling1D(5))
-    model.add(Conv1D(1, 1, activation='relu'))
-    model.add(GlobalMaxPooling1D())
-    model.add(Dense(128, activation='sigmoid'))
-    model.add(Dense(11, activation='softmax'))
-
-    model.compile(loss='binary_crossentropy',
-                  optimizer='rmsprop',
-                  metrics=['accuracy'])
-
-    model.summary()
-
-    return model
-
-
-
-
-
-
-
 def human_raters_agreement():
-     data = reader_full.read_dataset(essayset, filepath=essayfile)
-     rater1 = np.zeros((number_of_essays, 0))
-     rater2 = np.zeros((number_of_essays, 0))
-     rater1 = extract.score(rater1, 3, data)
-     rater2 = extract.score(rater2, 4, data)
-     human_raters_agreement = extra_functions.quadratic_weighted_kappa_score(rater1, rater2)
-     return human_raters_agreement
+    asap_ranges = {
+    0: (0, 60),
+    1: (1, 6),
+    2: (1, 6),
+    3: (0, 3),
+    4: (0, 3),
+    5: (0, 4),
+    6: (0, 4),
+    7: (0, 15),
+    8: (0, 30)
+    }
+    essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
+    essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+    human_raters_agreement = []
+    for essayset in essaysets:
+         set = essayset[0]
+         min_rating = asap_ranges[set][0]
+         max_rating = asap_ranges[set][1]
+         data = reader_full.read_dataset(essayset, filepath=essayfile)
+         data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
+         rater1 = []
+         rater2 = []
+         for essay in data:
+             rater1.append(int(essay[3]))
+             rater2.append(int(essay[4]))
 
-
+         kappa = quadratic_weighted_kappa(rater1, rater2, min_rating, max_rating)
+         human_raters_agreement.append(kappa)
+    return human_raters_agreement
 
 
 def save_confusion_matrix(savefile, x, d, model, essayset, output, title=None):

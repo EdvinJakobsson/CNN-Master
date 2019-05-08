@@ -3,9 +3,9 @@ from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, BatchNormalization, Activation
 from keras.models import Model, Sequential
 from keras.initializers import Constant
+from keras import optimizers
 
-
-def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0):
+def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0, learning_rate = 0.001):
 
     if output == 'linear':
         if model_number == 1:
@@ -13,7 +13,7 @@ def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, lay
         if model_number == 3:
             model = CNN_linear_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
         if model_number == 4:
-            model = CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+            model = CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate)
         if model_number == 6:
             model = CNN_linear_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
         if model_number == 7:
@@ -231,8 +231,7 @@ def CNN_linear_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     return model
 
     #same as model 1
-def CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 128, dropout = 0):
-
+def CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 128, dropout = 0, learning_rate = 0.001):
     sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
     model = Sequential()
     model.add(embedding_layer)
@@ -248,7 +247,8 @@ def CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     model.add(Dense(dense, activation='sigmoid'))
     model.add(Dropout(dropout))
     model.add(Dense(1, activation='linear'))
-    model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+    opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
+    model.compile(loss='mse', optimizer=opt, metrics=['accuracy'])
     print("model 4 linear created")
     return model
 
