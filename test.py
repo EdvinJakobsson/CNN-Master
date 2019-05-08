@@ -31,7 +31,7 @@ trainable_embeddings = False
 
 #hyper-parameters
 output = 'linear'      #linear, sigmoid or softmax
-model_number = 4
+model_number = 8
 dropout = 0.5
 learning_rate = 0.0001
 dense = 100
@@ -43,19 +43,19 @@ numbers_of_kappa_measurements = 20
 epochs_between_kappa = 1
 essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 
-# #test values only for my computer
-# numbers_of_kappa_measurements = 2
-# epochs_between_kappa = 1
-# number_of_word_embeddings = 1
-# dense = 1
-# kernels = 1
-# kernel_length = 1
-# essaysets = [[1],[2]]
-# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+#test values only for my computer
+numbers_of_kappa_measurements = 2
+epochs_between_kappa = 1
+number_of_word_embeddings = 1
+dense = 1
+kernels = 1
+kernel_length = 1
+essaysets = [[1],[2]]
+essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
-folder = "Results/linear4/"
+folder = "Results/" + output + str(model_number) + "/"
 os.makedirs(folder)
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
@@ -105,7 +105,7 @@ for essayset in essaysets:
         val_loss_list.append(val_loss)
 
     matrix_savefile = essay_folder + "dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * numbers_of_kappa_measurements)
-    functions.save_confusion_matrix(matrix_savefile, x_val, d_val, model, essayset, output)
+    #functions.save_confusion_matrix(matrix_savefile, x_val, d_val, model, essayset, output)
     training_values.close()
     kappa_plot = essay_folder + "Kappa-Dense" + str(dense) + "Kernels" + str(kernels) + "Length" + str(kernel_length) + ".png"
     functions.plot_kappa(kappa_plot, epoch_list, val_kappa_list, train_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")

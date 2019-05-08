@@ -3,7 +3,7 @@ from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, BatchNormalization, Activation
 from keras.models import Model, Sequential
 from keras.initializers import Constant
-from keras import optimizers
+from keras import optimizers, regularizers
 
 def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0, learning_rate = 0.001):
 
@@ -18,6 +18,10 @@ def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, lay
             model = CNN_linear_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
         if model_number == 7:
             model = CNN_linear_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
+        if model_number == 8:
+            model = CNN_linear_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate, L_two = 0.01)
+        else:
+            print("Create_model function: No model was found.")
 
     elif output == 'sigmoid':
         if model_number == 2:
@@ -30,6 +34,8 @@ def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, lay
             model = CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
         if model_number == 7:
             model = CNN_sigmoidal_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+        else:
+            print("Create_model function: No model was found.")
 
     else:
         print("Create_model function: No model was found.")
@@ -291,5 +297,29 @@ def CNN_linear_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     model.add(Dropout(dropout))
     model.add(Dense(1, activation='linear'))
     model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
+
+
+    #added L2 to model 4
+def CNN_linear_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 128, dropout = 0, learning_rate = 0.001, L_two = 0.01):
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid', kernel_regularizer=regularizers.l2(L_two)))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation='linear'))
+    opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
+    model.compile(loss='mse', optimizer=opt, metrics=['accuracy'])
+    print("model 8 linear created")
 
     return model
