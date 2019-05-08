@@ -5,35 +5,43 @@ from keras.models import Model, Sequential
 from keras.initializers import Constant
 from keras import optimizers, regularizers
 
-def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0, learning_rate = 0.001):
+def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 100, dropout = 0, learning_rate = 0.001, number_of_classes = None):
 
     if output == 'linear':
         if model_number == 1:
             model = CNN_linear_output1(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-        if model_number == 3:
+        elif model_number == 3:
             model = CNN_linear_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-        if model_number == 4:
+        elif model_number == 4:
             model = CNN_linear_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate)
-        if model_number == 6:
+        elif model_number == 6:
             model = CNN_linear_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-        if model_number == 7:
+        elif model_number == 7:
             model = CNN_linear_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-        if model_number == 8:
+        elif model_number == 8:
             model = CNN_linear_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate, L_two = 0.01)
         else:
-            print("Create_model function: No model was found.")
+            print("Create_model function: No linear model was found.")
 
     elif output == 'sigmoid':
         if model_number == 2:
             model = CNN_sigmoidal_output2(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
-        if model_number == 3:
+        elif model_number == 3:
             model = CNN_sigmoidal_output3(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
-        if model_number == 4:
+        elif model_number == 4:
             model = CNN_sigmoidal_output4(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
-        if model_number == 6:
+        elif model_number == 6:
             model = CNN_sigmoidal_output6(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
-        if model_number == 7:
+        elif model_number == 7:
             model = CNN_sigmoidal_output7(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout)
+        else:
+            print("Create_model function: No sigmoid model was found.")
+
+    elif output == 'softmax':
+        if model_number == 4:
+            model = CNN_softmax_output4(number_of_classes, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout, learning_rate = learning_rate)
+        elif model_number == 8:
+            model = CNN_softmax_output8(number_of_classes, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout, learning_rate = learning_rate, L_two = 0.01)
         else:
             print("Create_model function: No model was found.")
 
@@ -321,5 +329,84 @@ def CNN_linear_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
     model.compile(loss='mse', optimizer=opt, metrics=['accuracy'])
     print("model 8 linear created")
+
+    return model
+
+
+
+
+
+
+######################       SOFTMAX      ################################
+
+
+    #softmax without globalmaxpooling
+def CNN_softmax_output4(number_of_classes, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 128, dropout = 0, learning_rate = 0.001):
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid'))
+    model.add(Dropout(dropout))
+    model.add(Dense(number_of_classes, activation='softmax'))
+    opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    print("model 4 softmax created")
+    return model
+
+
+
+    #added L2 to model 4
+def CNN_softmax_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = 1, kernel_length = 1, dense = 128, dropout = 0, learning_rate = 0.001, L_two = 0.01):
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Conv1D(kernels, kernel_length))
+    model.add(BatchNormalization())
+    model.add(Activation("relu"))
+    model.add(MaxPooling1D(5))
+    model.add(Flatten())
+    model.add(Dense(dense, activation='sigmoid', kernel_regularizer=regularizers.l2(L_two)))
+    model.add(Dropout(dropout))
+    model.add(Dense(number_of_classes, activation='softmax'))
+    opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    print("model 8 softmax created")
+
+    return model
+
+
+
+def create_model2222(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 1, kernels = 1, kernel_length = 1, dense=1, dropout=0, maxpooling = 5):
+
+    # train a 1D convnet with global maxpooling
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
+    embedded_sequences = Dropout(dropout)(embedded_sequences)
+    x = Conv1D(kernels, kernel_length, activation='relu')(embedded_sequences)
+    x = MaxPooling1D(maxpooling)(x)
+    x = Conv1D(kernels, 3, activation='relu')(x)
+    #x = MaxPooling1D(5)(x)
+    #x = Conv1D(kernels, kernel_length, activation='relu')(x)
+    x = GlobalMaxPooling1D()(x)
+    x = Dense(dense, activation='sigmoid')(x)
+    preds = Dense(11, activation='softmax')(x)
+
+    model = Model(sequence_input, preds)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc'])
 
     return model

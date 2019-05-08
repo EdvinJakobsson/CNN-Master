@@ -16,6 +16,16 @@ from keras.initializers import Constant
 from BenHamner.score import mean_quadratic_weighted_kappa
 
 #dont change these
+asap_ranges = {
+0: (0, 60),
+1: (2, 12),
+2: (1, 6),
+3: (0, 3),
+4: (0, 3),
+5: (0, 4),
+6: (0, 4),
+7: (0, 30),
+8: (0, 60)}
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'    #removes some of the tf warnings
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NUM_WORDS = 100000
@@ -30,8 +40,8 @@ number_of_word_embeddings = -1   #all of them
 trainable_embeddings = False
 
 #hyper-parameters
-output = 'linear'      #linear, sigmoid or softmax
-model_number = 8
+output = 'softmax'      #linear, sigmoid or softmax
+model_number = 4
 dropout = 0.5
 learning_rate = 0.0001
 dense = 100
@@ -39,20 +49,20 @@ kernels = 100
 kernel_length = 3
 
 #training
-numbers_of_kappa_measurements = 20
+numbers_of_kappa_measurements = 10
 epochs_between_kappa = 1
 essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 
-#test values only for my computer
-numbers_of_kappa_measurements = 2
-epochs_between_kappa = 1
-number_of_word_embeddings = 1
-dense = 1
-kernels = 1
-kernel_length = 1
-essaysets = [[1],[2]]
-essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+# #test values only for my computer
+# numbers_of_kappa_measurements = 2
+# epochs_between_kappa = 1
+# number_of_word_embeddings = 1
+# dense = 1
+# kernels = 1
+# kernel_length = 1
+# essaysets = [[1],[2]]
+# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
 
 
 folder = "Results/" + output + str(model_number) + "/"
@@ -63,6 +73,8 @@ kappa_list = []
 kappa_file = open(folder + "kappas.txt", "+w")
 for essayset in essaysets:
     print("essayset ", essayset[0])
+    set = essayset[0]
+    number_of_classes =  asap_ranges[set][1]-asap_ranges[set][0]+1
     data = reader_full.read_dataset(essayset, filepath=essayfile)
     data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
     texts, essaysetlist, essaynumber, targets = functions.process_texts(data, output, essayset)
@@ -74,10 +86,8 @@ for essayset in essaysets:
     essay_folder = folder + 'essayset' + str(essayset[0]) + "/"
     os.makedirs(essay_folder)
 
-    if output == 'softmax':
-        model = functions.create_model(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout)
-    else:
-        model = models.create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate)
+
+    model = models.create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate, number_of_classes = number_of_classes)
     x_train, d_train, x_val, d_val = functions.split_data(pad_seq, essaysetlist, essaynumber, targets, VALIDATION_SPLIT, randomize_data)
 
     training_file = essay_folder + "Dense" + str(dense) + "Kernels" + str(kernels) + "Length" + str(kernel_length) + "-training_file.txt"
@@ -104,7 +114,7 @@ for essayset in essaysets:
         train_loss_list.append(train_loss)
         val_loss_list.append(val_loss)
 
-    matrix_savefile = essay_folder + "dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * numbers_of_kappa_measurements)
+    #matrix_savefile = essay_folder + "dense" + str(dense) + "kernels" + str(kernels) + "kernellength" + str(kernel_length) + "epochs" + str(epochs_between_kappa * numbers_of_kappa_measurements)
     #functions.save_confusion_matrix(matrix_savefile, x_val, d_val, model, essayset, output)
     training_values.close()
     kappa_plot = essay_folder + "Kappa-Dense" + str(dense) + "Kernels" + str(kernels) + "Length" + str(kernel_length) + ".png"
@@ -114,8 +124,8 @@ for essayset in essaysets:
 
     kappa_list.append(val_kappa_list[-1])
     kappa_file.write(str(val_kappa_list[-1]) + "\t")
-
-functions.plot_kappa(folder + "kappas.png", epoch_list, kappa_list, title = "Dropout: " + str(dropout), x_axis="Essay Set")
+essay_set_list = [i+1 for i in range(len(kappa_list))]
+functions.plot_kappa(folder + "kappas.png", essay_set_list, kappa_list, title = "Dropout: " + str(dropout), x_axis="Essay Set")
 mean_kappa = mean_quadratic_weighted_kappa(kappa_list)
 kappa_file.write("\t" + str(mean_kappa) + "\r")
 
