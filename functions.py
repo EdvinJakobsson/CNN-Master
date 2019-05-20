@@ -25,13 +25,14 @@ def read_word_vectors(filepath, stop = -1):
     counter = 0
     f = open(filepath, encoding="utf8")
     for line in f:
+        if counter == stop:
+            break;
         values = line.split()
         word = values[0]
         coefs = np.asarray(values[1:], dtype='float32')
         embeddings_index[word] = coefs
         counter += 1
-        if counter == stop:
-            break;
+
     f.close()
 
     print('Found %s word vectors.' % len(embeddings_index))
@@ -74,29 +75,24 @@ def argmax(x_val, d_val, essayset, model, output):
             targets.append(int(d_val[i]*max_score))
     elif(output == 'linear'):
         for i in range(len(x_val)):
-            predictions.append(int(p[i]+0.5))
             targets.append(int(d_val[i]))
+            prediction = int(p[i]+0.5)
+            if prediction > max_score:
+                prediction = max_score
+            if prediction < 0:
+                prediction = 0
+            predictions.append(prediction)
     else:
         print("argmax: something wrong with 'output' value")
     #print(predictions)
     return(predictions, targets)
 
 
-def process_texts(data, output, essays):
-    print('Processing text dataset')
-    asap_ranges = {
-    0: (0, 60),
-    1: (2, 12),
-    2: (1, 6),
-    3: (0, 3),
-    4: (0, 3),
-    5: (0, 4),
-    6: (0, 4),
-    7: (0, 30),
-    8: (0, 60)
-    }
+def process_texts(data, output, essays, asap_ranges, human_range):
+
     essayset = essays[0]
     range = asap_ranges[essayset]
+    number_of_classes = range[1]-range[0]+1
     texts = []  # list of text samples
     essaysetlist  = [] #list of which set each text belongs to
     essaynumber = []
@@ -106,10 +102,13 @@ def process_texts(data, output, essays):
         texts.append(row[2])
         essaysetlist.append(int(row[1]))
         essaynumber.append(int(row[0]))
-        targets.append(int(row[6])-range[0]) #changing grades to start at 0
+        if human_range == False:
+            targets.append(int(row[6])-range[0]) # -range changes grades to start at 0
+        else:
+            targets.append(int(row[3])-range[0]) # -range changes grades to start at 0
 
     if(output == 'softmax'):
-        targets = to_categorical(np.asarray(targets)) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
+        targets = to_categorical(np.asarray(targets), number_of_classes) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
     elif(output == 'linear'):
         targets = np.array(targets)
     elif(output == 'sigmoid'):
@@ -118,7 +117,7 @@ def process_texts(data, output, essays):
 
     essaysetlist = np.array(essaysetlist)
     essaynumber = np.array(essaynumber)
-    print('Found %s texts. ' % len(texts))
+    #print('Found %s texts. ' % len(texts))
 
     return texts, essaysetlist, essaynumber, targets
 
@@ -130,7 +129,7 @@ def texts_to_sequences(MAX_NUM_WORDS, texts):
     sequences = tokenizer.texts_to_sequences(texts) #list of all texts where words are numbers instead
     word_index = tokenizer.word_index #dictionary mapping each word to the correct number
 
-    print('Found %s unique tokens.' % len(word_index))
+    #print('Found %s unique tokens.' % len(word_index))
 
     return sequences, word_index
 
@@ -210,16 +209,18 @@ def plot_kappa(filename, epochs, val_kappa, train_kappa = None, title = "", x_ax
     plt.savefig(filename)
     plt.close()
 
-def plot_loss(filename, epochs, train_loss, val_loss, title, x_axis):
+def plot_loss(filename, epochs, train_loss, val_loss, title, x_axis, y_max = 2):
     plt.plot(epochs,train_loss, "r--", label='Training Loss')
     plt.plot(epochs,val_loss, label='Validation Loss')
     plt.ylabel('Loss')
     plt.xlabel(x_axis)
-    #plt.ylim(0,3)
+    plt.ylim(0,y_max)
     plt.title(title)
     plt.legend()
     plt.savefig(filename)
     plt.close()
+
+
 
 
 def human_raters_agreement():
@@ -242,7 +243,7 @@ def human_raters_agreement():
          min_rating = asap_ranges[set][0]
          max_rating = asap_ranges[set][1]
          data = reader_full.read_dataset(essayset, filepath=essayfile)
-         data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
+         #data = data[:int(len(data)*0.7)]    # save 30% of essays for final evaluation
          rater1 = []
          rater2 = []
          for essay in data:
@@ -254,19 +255,9 @@ def human_raters_agreement():
     return human_raters_agreement
 
 
-def save_confusion_matrix(savefile, x, d, model, essayset, output, title=None):
+def save_confusion_matrix(savefile, x, d, model, essayset, output, asap_ranges, title=None):
     predictions, targets = argmax(x, d, essayset, model, output)
-    asap_ranges = {
-    0: (0, 60),
-    1: (2, 12),
-    2: (1, 6),
-    3: (0, 3),
-    4: (0, 3),
-    5: (0, 4),
-    6: (0, 4),
-    7: (0, 30),
-    8: (0, 60)
-    }
+
     essayset = essayset[0]
     min_score = asap_ranges[essayset][0]
     max_score = asap_ranges[essayset][1]
