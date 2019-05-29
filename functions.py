@@ -46,6 +46,12 @@ def quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, output):
 
     return kappa
 
+def quadratic_weighted_kappa_for_hybrid(x, d_val, essayset, model, output):
+    y_test, d_test = argmax(x, d_val, essayset, model, output)
+    kappa = quadratic_weighted_kappa(d_test, y_test)
+
+    return kappa
+
 
 def argmax(x_val, d_val, essayset, model, output):
     asap_ranges = {
@@ -62,19 +68,32 @@ def argmax(x_val, d_val, essayset, model, output):
     essayset = essayset[0]
     max_score = asap_ranges[essayset][1] - asap_ranges[essayset][0]
 
-    p = model.predict([x_val])
+
     predictions = []
     targets = []
     if output == 'softmax':
+        p = model.predict([x_val])
         for i in range(len(x_val)):
             predictions.append(np.argmax(p[i]))
             targets.append(np.argmax(d_val[i]))
     elif(output == 'sigmoid'):
+        p = model.predict([x_val])
         for i in range(len(x_val)):
             predictions.append(int(p[i]*max_score+0.5))
             targets.append(int(d_val[i]*max_score))
     elif(output == 'linear'):
+        p = model.predict([x_val])
         for i in range(len(x_val)):
+            targets.append(int(d_val[i]))
+            prediction = int(p[i]+0.5)
+            if prediction > max_score:
+                prediction = max_score
+            if prediction < 0:
+                prediction = 0
+            predictions.append(prediction)
+    elif(output == 'hybrid'):
+        p = model.predict([x_val[0], x_val[1]])
+        for i in range(len(d_val)):
             targets.append(int(d_val[i]))
             prediction = int(p[i]+0.5)
             if prediction > max_score:
@@ -84,8 +103,9 @@ def argmax(x_val, d_val, essayset, model, output):
             predictions.append(prediction)
     else:
         print("argmax: something wrong with 'output' value")
-    #print(predictions)
     return(predictions, targets)
+
+
 
 
 def process_texts(data, output, essays, asap_ranges, human_range):
@@ -109,7 +129,7 @@ def process_texts(data, output, essays, asap_ranges, human_range):
 
     if(output == 'softmax'):
         targets = to_categorical(np.asarray(targets), number_of_classes) #creates a target vector for each text. If a text belongs to class 0 out of 4 classes the vector will be: [1., 0., 0., 0.]
-    elif(output == 'linear'):
+    elif(output == 'linear' or output == 'hybrid'):
         targets = np.array(targets)
     elif(output == 'sigmoid'):
         targets = [x / (range[1]-range[0]) for x in targets]

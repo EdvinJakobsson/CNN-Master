@@ -1,5 +1,5 @@
 from keras.utils import to_categorical
-from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout, Flatten
+from keras.layers import Dense, Input, GlobalMaxPooling1D, Dropout, Flatten, concatenate
 from keras.layers import Conv1D, MaxPooling1D, Embedding, BatchNormalization, Activation
 from keras.models import Model, Sequential
 from keras.initializers import Constant
@@ -44,7 +44,11 @@ def create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, lay
             model = CNN_softmax_output8(number_of_classes, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dropout = dropout, learning_rate = learning_rate, L_two = L_two)
         else:
             print("Create_model function: No model was found.")
-
+    elif output == 'hybrid':
+        if model_number == 1:
+            model = hybrid1(MAX_SEQUENCE_LENGTH, embedding_layer)
+        if model_number == 2:
+            model = hybrid2(MAX_SEQUENCE_LENGTH, embedding_layer)
     else:
         print("Create_model function: No model was found.")
     return model
@@ -328,7 +332,9 @@ def CNN_linear_output8(MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels
     model.add(Dense(1, activation='linear'))
     opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
     model.compile(loss='mse', optimizer=opt, metrics=['accuracy'])
-    
+
+    model.summary()
+    exit(0)
     return model
 
 
@@ -383,5 +389,35 @@ def CNN_softmax_output8(number_of_classes, MAX_SEQUENCE_LENGTH, embedding_layer,
     opt = optimizers.RMSprop(lr=learning_rate, rho=0.9, epsilon=None, decay=0.0)
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
+
+    return model
+
+
+
+
+##########################       HYBRID      ##############################
+
+def hybrid1(MAX_SEQUENCE_LENGTH, embedding_layer):
+
+    cnn_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32', name='cnn_input')
+    embedded_sequences = embedding_layer(cnn_input)
+    x1 = Conv1D(100, 3, activation='relu')(embedded_sequences)
+    x1 = MaxPooling1D(5)(x1)
+    x1 = Conv1D(100, 3, activation='relu')(x1)
+    x1 = MaxPooling1D(5)(x1)
+    x1 = Flatten()(x1)
+    x1 = Dense(100, activation='sigmoid')(x1)
+
+    mlp_input = Input(shape=(4,), name='mlp_input')
+    x2 = Dense(50, activation='relu')(mlp_input)
+    x2 = Dense(50, activation='relu')(x2)
+    x2 = Dense(50, activation='relu')(x2)
+
+    x = concatenate([x1, x2])
+    x = Dense(100, activation='relu')(x)
+
+    prediction = Dense(1, activation='linear', name='prediction')(x)
+    model = Model(inputs=[cnn_input, mlp_input], outputs=prediction)
+    model.compile(loss='mse', optimizer='rmsprop', metrics=['acc'])
 
     return model

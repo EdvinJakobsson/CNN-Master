@@ -5,16 +5,18 @@ import csv
 import reader_full
 import functions
 import models
+import time
+import extraction_functions as extract
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.text import text_to_word_sequence
 from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
+from keras.utils import to_categorical, normalize
 from keras.layers import Dense, Input, GlobalMaxPooling1D
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 from keras.initializers import Constant
 from BenHamner.score import mean_quadratic_weighted_kappa
-import time
+
 start = time.time()
 
 #dont change these
@@ -45,18 +47,19 @@ wordvectorfile = "/home/william/m18_edvin/Projects/Data/glove.6B/glove.6B.100d.t
 
 #word embeddings
 number_of_word_embeddings = -1       #-1 = all of them
-trainable_embeddings = False
+trainable_embeddings = True
 
 #hyper-parameters
 output = 'linear'      #linear, sigmoid or softmax
-model_number = 8
+output = 'hybrid'
+model_number = 1
 dropout = 0.5
 learning_rate = 0.0001
 dense = 100
 kernels = 100
 kernel_length = 3
 batch_size = 10
-tests = 3
+tests = 10
 
 #training
 epochs_between_kappa = 1
@@ -64,15 +67,15 @@ essaysets = [[1],[2],[3],[4],[5],[6],[7],[8]]
 L_two = 0.0001
 
 
-# #test values only for my computer
+# # #test values only for my computer
 # number_of_word_embeddings = 1
 # dense = 1
 # kernels = 1
 # kernel_length = 1
 # essaysets = [[1]]
-essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
-wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
-# tests = 2
+# essayfile = "C:/Users/Edvin/Projects/Data/asap-aes/training_set_rel3.tsv"
+# wordvectorfile = "C:/Users/Edvin/Projects/Data/glove.6B/glove.6B.100d.txt"
+# tests = 1
 
 
 embeddings_index = functions.read_word_vectors(wordvectorfile,number_of_word_embeddings)
@@ -109,6 +112,19 @@ for test in range(1,tests+1):
         model = models.create_model(output, model_number, MAX_SEQUENCE_LENGTH, embedding_layer, layers = 2, kernels = kernels, kernel_length = kernel_length, dense = dense, dropout = dropout, learning_rate = learning_rate, L_two = L_two, number_of_classes = number_of_classes)
         x_train, d_train, x_val, d_val = functions.split_data(pad_seq, essaysetlist, essaynumber, targets, VALIDATION_SPLIT, randomize_data)
 
+        number_of_essays = len(data)
+        x = np.zeros((number_of_essays, 0))
+        x = extract.word_length(x, data)
+        x = extract.average_word_length(x, data)
+        x = extract.stan_dev_word_length(x, data)
+        x = extract.dale_score(x, data)
+        x = normalize(x, axis=0)
+        number_of_inputs = len(x[0])
+
+        train_index = len(d_train)
+        x_train_mlp = x[0:train_index]
+        x_val_mlp = x[train_index:]
+
         training_file = folder + "set" + str(set) + "-training_file.txt"
         training_values = open(training_file, "w+")
         training_values.write("epoch \t train loss \t train acc \t val loss \t val acc \t train kappa \t val kappa \r")
@@ -119,12 +135,12 @@ for test in range(1,tests+1):
         train_kappa_list = []
         val_kappa_list = []
         for i in range(1, number_of_kappa_measurements+1):
-            #print("Epoch: " + str(i*epochs_between_kappa))
-            model.fit(x_train, d_train, batch_size=batch_size, epochs=epochs_between_kappa, verbose=False, validation_data=(x_val, d_val))
-            train_loss, train_acc = model.evaluate(x_train, d_train, verbose=2)
-            val_loss, val_acc = model.evaluate(x_val, d_val, verbose=2)
-            train_kappa = functions.quadratic_weighted_kappa_for_cnn(x_train, d_train, essayset, model, output)
-            val_kappa = functions.quadratic_weighted_kappa_for_cnn(x_val, d_val, essayset, model, output)
+            print("Epoch: " + str(i*epochs_between_kappa))
+            model.fit([x_train, x_train_mlp], d_train, batch_size=batch_size, epochs=epochs_between_kappa, verbose=False, validation_data=([x_val, x_val_mlp], d_val))
+            train_loss, train_acc = model.evaluate([x_train, x_train_mlp], d_train, verbose=2)
+            val_loss, val_acc = model.evaluate([x_val, x_val_mlp], d_val, verbose=2)
+            train_kappa = functions.quadratic_weighted_kappa_for_hybrid([x_train, x_train_mlp], d_train, essayset, model, output)
+            val_kappa = functions.quadratic_weighted_kappa_for_hybrid([x_val, x_val_mlp], d_val, essayset, model, output)
 
             training_values.write("%.0f \t %.2f \t  %.2f \t %.2f  \t  %.2f  \t  %.3f  \t  %.3f \r" % (i*epochs_between_kappa, train_loss, train_acc, val_loss, val_acc, train_kappa, val_kappa))
             epoch_list.append(i*epochs_between_kappa)
@@ -135,7 +151,7 @@ for test in range(1,tests+1):
 
         training_values.close()
         matrix_savefile = folder + "Confusion-Matrix-set" + str(set) + ".png"
-        functions.save_confusion_matrix(matrix_savefile, x_val, d_val, model, essayset, output, asap_ranges, "Confusion Matrix")
+        functions.save_confusion_matrix(matrix_savefile, [x_val, x_val_mlp], d_val, model, essayset, output, asap_ranges, "Confusion Matrix")
         kappa_plot = folder + "kappa-set" + str(set) + ".png"
         functions.plot_kappa(kappa_plot, epoch_list, val_kappa_list, train_kappa_list, title = "Dropout: " + str(dropout), x_axis="Epoch")
 
