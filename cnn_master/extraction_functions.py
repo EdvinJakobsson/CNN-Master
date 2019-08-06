@@ -6,13 +6,15 @@ import textstat
 
 def extract_words(text):
     # object used to remove punctuations in essay
-    tokenizer = RegexpTokenizer(r'\w+')
+    tokenizer = RegexpTokenizer(r"\w+")
     words = tokenizer.tokenize(text)
 
     return words
 
 
-def word_length(array, data):    # array is input values, data is the list created by reader.py.
+def word_length(
+    array, data
+):  # array is input values, data is the list created by reader.py.
     try:
         values = []
         for row in data:

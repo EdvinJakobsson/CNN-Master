@@ -1,0 +1,6 @@
+numpy
+nltk
+textstat
+scikit-learn
+tensorflow
+matplotlib
